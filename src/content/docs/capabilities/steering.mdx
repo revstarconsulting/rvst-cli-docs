@@ -1,0 +1,46 @@
+---
+title: Steering
+description: The always-on context files that shape every task.
+---
+
+Steering files are Markdown documents installed at `.kiro/steering/*.md` with
+`inclusion: always` — they are loaded into context on **every** task, not on
+demand. They are how RevStar conventions travel with the project.
+
+## `revstar-standards` (always on)
+
+The engineering rulebook every agent follows:
+
+- **Branch naming** — `<type>/<ado-id>-<short-description>`, where type is
+  `feat` / `bugfix` / `hotfix` / `chore` / `refactor`.
+- **Commit messages** — `type: description`, lowercase, imperative, no
+  parenthetical scope, ≤72 chars.
+- **PR titles & description** — mirror the commit format with `(#ADO-ID)`, plus
+  a Summary / Work Item / Changes / Testing template.
+- **Spec naming** — `<ado-ticket>-<taskname>`, confirmed with you before
+  generation.
+- **Definition of Done** — a 6-point checklist (acceptance criteria, tests,
+  clean build, review, ticket updated, PR opened).
+
+## `routing-authority` (always on)
+
+Declares that project-level agents (`code`, `review`, `deliver`, `ado`) take
+precedence over any global agents, and maps old global names to the project
+equivalents. This is what keeps the correct, versioned agents in charge.
+
+## `secrets-protection` (always on)
+
+A hard guardrail: never read `.env`, `*.pem`, `*.key`, credential files, etc.;
+never echo secret values; reference secrets by key name; check staged files for
+secrets before commit; `.env.example` placeholders are allowed.
+
+## `product` / `tech` / `structure` (template stubs)
+
+Three project-specific steering files ship as **empty templates** for you to
+fill in — product purpose, tech stack, and directory/architecture conventions.
+Fill them by editing directly, or ask Kiro:
+
+> "fill in my project steering files based on the codebase"
+
+Filling these is the highest-leverage customization — it gives every agent
+project-specific context on top of the always-on RevStar standards.

@@ -1,0 +1,54 @@
+---
+title: Install
+description: Install rvst-cli on macOS, Linux, or Windows.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The CLI is distributed as a single static binary from RevStar's CDN — no
+GitHub account, no package manager, no auth required for the download.
+
+## Install the CLI
+
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux" icon="apple">
+    ```sh
+    curl -fsSL https://d3n3trm9kejrw8.cloudfront.net/releases/install.sh | sh
+    ```
+    The script detects your OS and architecture and drops the binary on your
+    `PATH`.
+  </TabItem>
+  <TabItem label="Windows" icon="seti:windows">
+    Run in PowerShell:
+    ```powershell
+    irm https://d3n3trm9kejrw8.cloudfront.net/releases/install.ps1 | iex
+    ```
+  </TabItem>
+</Tabs>
+
+Verify it's installed:
+
+```sh
+rvst-cli --version
+```
+
+## Keep it up to date
+
+The CLI updates itself — it does **not** need to be reinstalled through the
+script each time:
+
+```sh
+rvst-cli install @latest
+```
+
+This fetches the newest CLI binary from the CDN (the same immutable release
+path), independent of the capability registry.
+
+:::tip
+`rvst-cli install` updates the **CLI binary**. `rvst-cli link` updates the
+**capabilities** in a project. They are separate on purpose.
+:::
+
+## Next step
+
+With the CLI installed, [link a project](/start/link/).

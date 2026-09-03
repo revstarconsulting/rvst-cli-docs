@@ -1,0 +1,64 @@
+---
+title: Agents
+description: The five agents the registry installs and when to use each.
+---
+
+Agents are the assistants you talk to. The bundle installs five, each scoped to
+a role with its own model and skill set.
+
+## `code` — senior software engineer
+
+Day-to-day implementation, debugging, and refactoring. Full tool access; owns
+the lifecycle from writing code through tests and verification.
+
+- **Skills:** `context`, `code`, `debug`, `refactor`, `handoff`
+- **How it works:** always runs the `context` skill first on a new task —
+  reads steering, acceptance criteria, and scans code before planning.
+- **Contract:** it presents a plan and **waits for approval before writing
+  code**, and never auto-invokes review.
+
+Use it for: "implement X", "fix this bug", "refactor this module".
+
+## `review` — tech lead
+
+Read-only code review, architecture decisions, estimation, and standards
+enforcement. Cannot write files or run commands — it analyzes and explains.
+
+- **Skills:** `review`, `architecture`, `estimate`, `standards`
+- **Verdict:** in a pipeline it ends with `APPROVED` or `NEEDS_CHANGES`.
+
+Use it for: "review this diff", "is this design sound?", "scope this work".
+
+## `deliver` — technical writer
+
+Turns staged changes or completed work into PM-friendly summaries. Read-only —
+never modifies code, never pushes to ADO unless you explicitly ask.
+
+- **Skills:** `breakdown` (default), `changelog`, `status`
+
+Use it for: "summarize what we did", "write release notes", "status update".
+
+## `ado` — Azure DevOps integration
+
+Fetches work-item context to set up a task, and pushes delivery summaries back
+as child tasks.
+
+- **Guardrails:** never logs time (all hour fields are always `0`), always uses
+  the exact task-title format `<Role> - <Full Name> - <MMDDYYYY>`, and never
+  auto-pushes tickets.
+
+Use it for: "pull ADO-12345", "update the ticket with a summary".
+
+## `skill-creator` — skill authoring assistant
+
+Interviews you about a new skill, drafts a well-formed `SKILL.md`, and tells you
+where it goes. Deliberately narrow — it authors skills, it is not a general CLI
+guide.
+
+See [Author Your Own Skill](/customize/authoring-skills/).
+
+## Routing
+
+You usually don't pick an agent by hand — the `routing-authority` steering file
+and the hooks decide. See [Hooks](/capabilities/hooks/) and
+[Steering](/capabilities/steering/).

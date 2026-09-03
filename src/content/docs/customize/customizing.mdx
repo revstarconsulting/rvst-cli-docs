@@ -1,0 +1,44 @@
+---
+title: Customize Without Losing It
+description: Edit skills and agents freely — the CLI never silently overwrites your changes.
+---
+
+The whole point of the delivery model is that you **customize** the capabilities
+for your project. The CLI is built so a later `rvst-cli link` never destroys
+your edits.
+
+## How upgrades handle your edits
+
+The CLI records a content hash of every file it installs. On the next `link`
+after a new registry version:
+
+- **Files you never touched** update silently to the new version.
+- **Files you edited since install** are protected:
+  - **Interactive run** — you get a per-file prompt: **keep**, **overwrite**, or
+    view a **diff** (a `[d]iff` loop shows exactly what changed upstream vs.
+    your version).
+  - **Non-interactive run** (e.g. CI) — the CLI keeps your version and warns.
+    It never clobbers silently.
+
+This means you can safely tune an agent's tone, tweak a skill's steps, or fill
+in a steering file, and know an upgrade won't wipe it out.
+
+## What's safe to edit
+
+- **Steering** — fill in `product.md`, `tech.md`, `structure.md`; adjust
+  standards if your project genuinely diverges.
+- **Skills** — tune the steps or triggers of any `SKILL.md`.
+- **Agents** — adjust an agent's instructions, welcome message, or skill list.
+
+## Recommended workflow
+
+1. Edit the file you want to customize.
+2. Keep the change small and purposeful — you'll be re-reading it at each
+   upgrade diff.
+3. On the next `rvst-cli link`, choose **diff** to see what upstream changed,
+   then **keep** or merge deliberately.
+
+:::tip
+If you find yourself making the *same* customization in every project, that's a
+signal it should go **into the registry** instead. Raise it so everyone gets it.
+:::

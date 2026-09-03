@@ -1,0 +1,63 @@
+---
+title: Troubleshooting
+description: Fixes for the issues developers actually hit.
+---
+
+## `crypto/rsa: verification error` on Windows
+
+**Cause:** Git's `core.autocrlf=true` rewrote the signed manifest to CRLF line
+endings on checkout, so the signature no longer matches.
+
+**Fix:** re-clone the registry cache so the line-ending normalization takes
+effect, then link again:
+
+```powershell
+Remove-Item -Recurse -Force $HOME\.rvst-cli\registry
+rvst-cli link
+```
+
+Current CLI versions normalize line endings before verifying, so a fresh cache
+resolves it.
+
+## `link` fails cloning the registry (HTTPS auth)
+
+**Symptom:** `git clone failed ... Invalid username or token. Password
+authentication is not supported.`
+
+**Cause:** the registry is fetched over git, and GitHub no longer accepts HTTPS
+password auth for a private repo.
+
+**Workaround:** point the CLI at the SSH remote for the fetch:
+
+```sh
+RVST_REGISTRY_URL=git@github.com:erodriiguezz/rvst-registry.git rvst-cli link
+```
+
+(Requires an SSH key configured for GitHub.)
+
+## `curl ... | sh` fails on Debian/Ubuntu
+
+Older install scripts used a bash-only option under `/bin/sh` (dash). Current
+scripts are POSIX-sh clean. If you hit it on an old script, run it with bash:
+
+```sh
+curl -fsSL <install-url> | bash
+```
+
+## A skill or agent I edited got flagged on upgrade
+
+That's expected — the CLI detected your edit and is protecting it. Choose
+**keep** to retain your version, or **diff** to see what changed upstream before
+deciding. See [Customize Without Losing It](/customize/customizing/).
+
+## An old clone runs `rvst-cli update` on every `git pull`
+
+Old clones may still have auto-update git hooks from a previous CLI version. The
+`update` command no longer exists, so the hook errors harmlessly. Remove the
+stale hooks:
+
+```sh
+for h in .git/hooks/post-merge .git/hooks/post-rewrite; do
+  [ -f "$h" ] && grep -q 'rvst-cli:auto-update' "$h" && rm -f "$h"
+done
+```

@@ -1,0 +1,34 @@
+---
+title: Commands
+description: The rvst-cli command surface at a glance.
+---
+
+| Command | What it does |
+| --- | --- |
+| `rvst-cli link` | Install / upgrade the current capability bundle into the project. The sole sync command. |
+| `rvst-cli unlink` | Remove installed capabilities and the managed `.gitignore` block from the project. |
+| `rvst-cli install @latest` | Self-update the CLI binary from the CDN (separate from capabilities). |
+| `rvst-cli --version` | Print the installed CLI version. |
+
+## link vs. install
+
+They are separate on purpose:
+
+- **`link`** manages **capabilities** (agents, skills, hooks, steering) in a
+  project.
+- **`install`** manages the **CLI binary** itself.
+
+## Versioning
+
+The CLI binary and the capability registry version independently:
+
+- The CLI version is injected at build time from its git tag (e.g. `v0.4.1`).
+- The registry capability `revstar/kiro` has its own version (currently
+  `0.7.0`), recorded in your project's `rvst.yaml`.
+
+Check both:
+
+```sh
+rvst-cli --version   # CLI binary
+cat rvst.yaml      # installed capability version
+```

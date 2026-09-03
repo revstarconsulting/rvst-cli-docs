@@ -1,0 +1,42 @@
+---
+title: Skills
+description: The on-demand playbooks each agent loads when a task matches.
+---
+
+A skill is a single `SKILL.md` playbook an agent loads **on demand** when your
+request matches its trigger. You don't invoke skills directly — the agent picks
+the right one. Skills are grouped by the agent that owns them.
+
+## Code agent skills
+
+| Skill | When it fires |
+| --- | --- |
+| `context` | **Mandatory** on every new task — gather context, ask questions, present a plan, get approval, then code. |
+| `code` | Writing/implementing/creating code — functions, features, endpoints, modules. |
+| `debug` | A bug, error, failing test, or unexpected behavior needs root-cause analysis. |
+| `refactor` | Restructure without behavior change — "clean this up", "extract", "rename", "reduce duplication". |
+| `handoff` | Summarize what one side of a full-stack feature built, so the sibling repo knows what to implement. |
+
+## Review agent skills
+
+| Skill | When it fires |
+| --- | --- |
+| `review` | Pre-PR review — security, correctness, performance. "review this", "is this ready for PR". |
+| `architecture` | Design decisions — "how should I structure this", "should we use X or Y". |
+| `estimate` | Scope and risk — "how long will this take", "what are the risks". |
+| `standards` | Coding standards and conventions — "what's our pattern for Y". |
+
+## Deliver agent skills
+
+| Skill | When it fires |
+| --- | --- |
+| `breakdown` | PM-friendly task breakdown of code changes — the default "summarize" / "deliver". |
+| `changelog` | Release notes from diffs or commit history — "what shipped". |
+| `status` | Client-facing status updates for stakeholders — "write a status email". |
+
+## Custom skills
+
+You can add your own — the `skill-creator` agent drafts one for you. See
+[Author Your Own Skill](/customize/authoring-skills/). Custom skills live at
+`.kiro/skills/<name>/SKILL.md` and are tracked in `rvst.yaml` once you register
+them via `rvst-cli link`.

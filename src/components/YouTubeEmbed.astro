@@ -1,0 +1,77 @@
+---
+/**
+ * YouTubeEmbed — drop an unlisted YouTube video into a docs page.
+ *
+ * Two modes, chosen per use:
+ *   Embed (default): renders a lazy, privacy-friendly iframe (youtube-nocookie.com).
+ *     <YouTubeEmbed id="dQw4w9WgXcQ" title="Linking a project" />
+ *   Link-out: renders a text/button link to youtube.com instead of embedding.
+ *     <YouTubeEmbed id="dQw4w9WgXcQ" title="Linking a project" mode="link" />
+ *
+ * Note: unlisted != private. Anyone with the link can watch. Do not use for
+ * confidential material.
+ */
+interface Props {
+  /** The YouTube video ID (the v= part of the URL), not the full URL. */
+  id: string;
+  /** Accessible title / link text. */
+  title?: string;
+  /** "embed" (default) renders an iframe; "link" renders a link-out. */
+  mode?: 'embed' | 'link';
+}
+
+const { id, title = 'Watch on YouTube', mode = 'embed' } = Astro.props;
+
+// youtube-nocookie.com avoids setting tracking cookies until the user plays.
+const embedSrc = `https://www.youtube-nocookie.com/embed/${id}`;
+const watchUrl = `https://www.youtube.com/watch?v=${id}`;
+---
+
+{
+  mode === 'link' ? (
+    <p class="yt-link">
+      <a href={watchUrl} target="_blank" rel="noopener noreferrer">
+        ▶ {title}
+      </a>
+    </p>
+  ) : (
+    <div class="yt-embed">
+      <iframe
+        src={embedSrc}
+        title={title}
+        loading="lazy"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      />
+      <p class="yt-fallback">
+        Can’t see the video?{' '}
+        <a href={watchUrl} target="_blank" rel="noopener noreferrer">
+          Open it on YouTube
+        </a>
+        .
+      </p>
+    </div>
+  )
+}
+
+<style>
+  .yt-embed {
+    margin: 1.5rem 0;
+  }
+  .yt-embed iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+    display: block;
+  }
+  .yt-fallback {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+  }
+  .yt-link a {
+    font-weight: 600;
+  }
+</style>

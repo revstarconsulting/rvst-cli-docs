@@ -1,0 +1,32 @@
+---
+title: Capabilities Overview
+description: The four kinds of capability the registry installs, and how they fit together.
+---
+
+The `revstar/kiro` bundle installs four kinds of capability. They layer on top
+of each other:
+
+- **[Steering](/capabilities/steering/)** — always-on context. Loaded on every
+  task. This is where standards and routing rules live.
+- **[Agents](/capabilities/agents/)** — the assistants you talk to. Each has a
+  role, a model, and a set of skills it can pull in.
+- **[Skills](/capabilities/skills/)** — on-demand playbooks. An agent loads a
+  skill when the task matches its trigger.
+- **[Hooks](/capabilities/hooks/)** — automation. They route work to the right
+  agent without you naming it.
+
+## How a task flows
+
+1. **Steering** is already in context (routing authority, RevStar standards).
+2. A **hook** may fire on your action and route to the correct **agent**.
+3. That **agent** loads the **skill** that fits the task.
+4. The agent does the work under the always-on **steering** rules.
+
+## Current version
+
+The bundle is `revstar/kiro` **v0.7.0**. Everything on these pages reflects
+what that version installs. Check your own install with:
+
+```sh
+cat rvst.yaml
+```

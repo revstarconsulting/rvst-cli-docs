@@ -1,0 +1,58 @@
+---
+title: Author Your Own Skill
+description: Use the skill-creator agent to build and register a custom skill.
+---
+
+A skill is a single `SKILL.md` file — YAML frontmatter plus a scannable body.
+The **`skill-creator`** agent drafts one for you from a plain-language
+description.
+
+## What a SKILL.md looks like
+
+```markdown
+---
+name: my-skill
+description: What the skill does AND the exact phrasing/situations that should trigger it.
+---
+
+# My Skill
+
+Short statement of what this skill produces or does.
+
+## Output Format
+...
+
+## Rules
+...
+```
+
+The **`description`** is the single most important field: it must state both the
+*function* and the *trigger*. A vague description never loads. Write it as
+"Use when the user asks for X, says 'Y', or is doing Z."
+
+## The workflow
+
+1. **Talk to `skill-creator`.** It interviews you on three things it can't
+   guess: **what** the skill produces, **when** it should trigger (exact
+   phrasing), and **how** (steps, output format, rules).
+2. **It reads a sibling skill** in your project so the new file matches the
+   house frontmatter shape and structure.
+3. **It drafts the complete `SKILL.md`** and tells you it goes at
+   `.kiro/skills/<name>/SKILL.md`.
+4. **You register it** by running `rvst-cli link` and answering the onboarding
+   prompt (kind: `skill`, name: `<name>`, source path: the file/dir it created).
+   That records it in `rvst.yaml` as a tracked custom capability.
+5. **It offers one refinement pass** on the triggers and steps.
+
+## Rules of thumb
+
+- **One skill, one job.** If you describe two jobs, make two skills.
+- **Triggers are everything.** A skill that never loads is dead weight.
+- **Match the house style.** New skills should read like the ones already
+  installed.
+
+:::note
+`skill-creator` authors and places the file — it doesn't install or register it.
+Registration happens through `rvst-cli link` onboarding, which is what makes it
+a tracked capability.
+:::

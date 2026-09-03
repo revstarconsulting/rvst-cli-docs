@@ -1,0 +1,46 @@
+---
+title: Link a Project
+description: Run rvst-cli link to install the current capability bundle into a project.
+---
+
+`rvst-cli link` is the single command that syncs the current `revstar/kiro`
+capability bundle into your project. Run it from the project root:
+
+```sh
+cd my-project
+rvst-cli link
+```
+
+The CLI will:
+
+1. Fetch and verify the signed registry bundle.
+2. Ask which target(s) to install for (e.g. `kiro`).
+3. Write agents, skills, hooks, and steering under `.kiro/`.
+4. Record what it installed in `rvst.yaml` and manage a `.gitignore` block.
+
+## Running it again (upgrades)
+
+Re-running `rvst-cli link` after a new registry version is the upgrade path.
+The CLI content-hashes what it installed:
+
+- **Files you never touched** update silently.
+- **Files you edited** are never clobbered. In an interactive run you get a
+  per-file choice — keep, overwrite, or view a diff. In a non-interactive run
+  the CLI keeps your version and warns.
+
+See [Customize Without Losing It](/customize/customizing/) for the full behavior.
+
+## Unlink
+
+To remove the installed capabilities from a project:
+
+```sh
+rvst-cli unlink
+```
+
+This removes the per-project capability files and the managed `.gitignore`
+block. It does not remove the CLI binary itself.
+
+## Next step
+
+Now learn [what you actually got](/capabilities/overview/).

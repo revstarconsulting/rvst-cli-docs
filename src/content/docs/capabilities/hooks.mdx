@@ -1,0 +1,40 @@
+---
+title: Hooks
+description: The automation triggers that route work to the right agent.
+---
+
+Hooks are small JSON automations installed at `.kiro/hooks/*.json`. They fire on
+an event and, most often, route your request to the right agent so you don't
+have to name it.
+
+## `session-context-loader`
+
+- **Trigger:** `SessionStart`
+- **What it does:** runs a shell command that snapshots project context — git
+  status, the last 10 commits, current branch, and uncommitted-change stats —
+  and injects it so the agent starts with full awareness of your working state.
+
+## `auto-code`
+
+- **Trigger:** `UserPromptSubmit`
+- **What it does:** detects when your message is a hands-on coding task (write,
+  implement, build, fix, debug, refactor, clean up) and delegates to the
+  **`code`** agent with its `code` / `debug` / `refactor` skills.
+- **What it deliberately skips:** summaries, breakdowns, and review requests —
+  those belong to other agents.
+
+## `auto-deliver`
+
+- **Trigger:** `UserPromptSubmit`
+- **What it does:** routes to the **`deliver`** agent **only** on explicit
+  summary/breakdown phrasing — "summarize the staged changes", "give me a
+  breakdown", "deliver this", "ticket summary".
+- **What it deliberately skips:** general questions, "what does this file do",
+  explanations. If nothing matches, the hook does nothing and your request
+  proceeds normally.
+
+:::note
+The routing is intentionally conservative — `auto-deliver` matches an explicit
+phrase list rather than guessing, so ordinary questions are never hijacked into
+a summary.
+:::

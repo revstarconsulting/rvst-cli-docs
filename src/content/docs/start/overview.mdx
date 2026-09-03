@@ -1,0 +1,46 @@
+---
+title: What is rvst-cli?
+description: What the RevStar CLI is, and what it installs into your project.
+---
+
+import { YouTubeEmbed } from '../../../components/YouTubeEmbed.astro';
+
+`rvst-cli` is RevStar's internal command-line tool for expanding [Kiro](https://kiro.dev)
+with a shared, versioned set of capabilities. You install the CLI once, then
+run `rvst-cli link` inside any project to pull down the current **`revstar/kiro`**
+capability bundle from the registry.
+
+## What gets installed
+
+When you link a project, the CLI writes a set of files under `.kiro/` (and a
+`rvst.yaml` marker that tracks what it installed):
+
+| Kind | Where it lands | What it does |
+| --- | --- | --- |
+| **Agents** | `.kiro/agents/*.md` | Purpose-built assistants — `code`, `review`, `deliver`, `ado`, `skill-creator` |
+| **Skills** | `.kiro/skills/<name>/SKILL.md` | On-demand playbooks an agent loads when a task matches |
+| **Hooks** | `.kiro/hooks/*.json` | Triggers that route work to the right agent automatically |
+| **Steering** | `.kiro/steering/*.md` | Always-on context: standards, routing authority, secrets protection |
+
+The bundle is **signed** — the CLI verifies the registry signature before
+installing, so you always get the exact, current capability set.
+
+:::note
+The `.kiro/` directory and `rvst.yaml` are added to your project's `.gitignore`
+by the CLI. Capabilities are delivered through the registry, not committed to
+your app repo.
+:::
+
+## The mental model
+
+- **The registry** (`revstar/kiro`, currently **v0.7.0**) is the source of truth.
+- **`rvst-cli link`** is the one command that syncs it into your project.
+- **You customize freely** — the CLI never silently overwrites files you've
+  edited. See [Customize Without Losing It](/customize/customizing/).
+
+{/* Replace VIDEO_ID with an unlisted YouTube ID once recorded. */}
+{/* <YouTubeEmbed id="VIDEO_ID" title="rvst-cli in 90 seconds" /> */}
+
+## Next step
+
+Head to [Install](/start/install/) to get the binary onto your machine.

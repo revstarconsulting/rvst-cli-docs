@@ -16,8 +16,16 @@
 import lifecycle from './sessions/lifecycle.json';
 import review from './sessions/review.json';
 import architecture from './sessions/architecture.json';
+import handoff from './sessions/handoff.json';
+import breakdown from './sessions/breakdown.json';
 
-const SESSIONS: Record<string, any> = { lifecycle, review, architecture };
+const SESSIONS: Record<string, any> = {
+  lifecycle,
+  review,
+  architecture,
+  handoff,
+  breakdown,
+};
 
 interface Props {
   /** Fixture id — filename under ./sessions/ without .json. */

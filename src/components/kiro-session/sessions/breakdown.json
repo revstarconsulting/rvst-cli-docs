@@ -1,0 +1,30 @@
+{
+  "id": "breakdown",
+  "title": "Breakdown",
+  "subtitle": "Turn a set of code changes into a PM-friendly summary to drop straight into a ticket.",
+  "model": "Claude Opus 4.8",
+  "effort": "High",
+  "mode": "Default",
+  "autopilot": true,
+  "capability": "breakdown",
+  "note": "Illustrative demo grounded in the revstar/kiro breakdown skill — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "blocks": [
+        { "type": "text", "text": "Give me a /breakdown of the action items work to drop in the ticket — the PM will read it." }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "shell", "summary": "Read the diff on the branch to summarize", "detail": "$ git diff --stat main...HEAD\n src/components/ActionItems.tsx            | 128 +++\n src/app/dashboard/action-items/page.tsx  |   5 +\n package.json                              |   6 +-" },
+        { "type": "text", "text": "## Summary\nAdded a **Meeting Action Items** page: a user uploads a recording or pastes a transcript and sees the extracted to-dos in a table they can tick off. Runs on sample data for now, ready to connect to the real extraction service." },
+        { "type": "text", "text": "## Changes\n\n**Action Items page**\n- New page where you drop in a recording or transcript and get a list of action items back.\n  - `src/components/ActionItems.tsx`\n- Made it reachable at its own address in the app.\n  - `src/app/dashboard/action-items/page.tsx`\n\n**Setup (internal — no user-facing impact)**\n- Added the UI toolkit and file-drop library the page needs.\n  - `package.json`" },
+        { "type": "text", "text": "## Testing\n- The project compiles cleanly with no errors.\n- Walked the page by hand: upload area accepts the expected file types, the loading state shows, the table renders, and toggling an item between *To do* and *Done* works." },
+        { "type": "text", "text": "## Notes / Risks\n- **Sample data only** — the page does not yet call a real service to extract items; that backend endpoint is handed off separately.\n- Nothing is saved yet: refreshing the page resets the list.\n- No breaking changes." },
+        { "type": "text", "text": "## Suggested commit\n`feat: add meeting action items page with upload and transcript input`" }
+      ]
+    }
+  ]
+}

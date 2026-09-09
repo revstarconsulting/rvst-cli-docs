@@ -1,0 +1,30 @@
+{
+  "id": "architecture",
+  "title": "Architecture",
+  "subtitle": "Designing async processing for a webhook ingest endpoint — one recommended approach.",
+  "model": "Claude Opus 4.8",
+  "effort": "High",
+  "mode": "Default",
+  "autopilot": true,
+  "capability": "architecture",
+  "note": "Illustrative demo grounded in the revstar/kiro architecture skill — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "blocks": [
+        { "type": "text", "text": "We're taking payment webhooks from a provider and doing 3-4 downstream updates per event (ledger, email, analytics). Right now it's all inline in the request handler and timing out. How should I structure this?" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "text", "text": "**Assumptions I'm working from** (correct any that are off — they'd change the recommendation):\n- **Scale:** webhooks are bursty but low volume — hundreds/hour, not thousands/second.\n- **Team:** small; you already run Postgres and a Node/API tier in production.\n- **Non-negotiable:** the provider retries on any non-2xx, so the endpoint must ack fast and never lose an event.\n\nThe core tension is fast acknowledgement vs. reliable downstream work — you can't do both inline, which is why it's timing out." },
+        { "type": "text", "text": "**Key decisions that shape everything:** (1) decouple *accept* from *process*; (2) make processing **idempotent**, because provider retries mean you *will* see duplicate events. Out of scope for now: a full streaming platform and cross-region delivery." },
+        { "type": "text", "text": "**Recommendation — persist-then-process on the stack you already run.** The handler does exactly two things: verify the signature and write the raw event to an `inbox` table keyed by the provider's event id (unique), then return `200`. A separate worker polls unprocessed rows and runs the 3-4 updates.\n\nThis is the transactional **inbox** pattern. The ack is a single indexed insert (fast, no timeout), the unique event id makes retries a no-op (idempotency), and a downstream failure just leaves the row unprocessed for the next poll — nothing is lost. **Boring technology for a boring problem** — no broker to run at this volume." },
+        { "type": "text", "text": "**Main alternative:** a real queue (SQS / Rabbit). I'd pick it instead once volume climbs into sustained thousands/minute or you need fan-out to many independent consumers — then a DB poller becomes the bottleneck. At your scale it's operational overhead with no payoff today. Honest weakness of my pick: the poller adds a few seconds of latency and is one more process to run; if near-real-time email matters, shorten the poll interval or trigger the worker on insert." },
+        { "type": "tool", "name": "diagram", "summary": "Sketched component + data flow", "detail": "Provider --> POST /webhooks (verify sig)\nHandler --> INSERT inbox(event_id UNIQUE) --> 200 OK\nWorker (poll) --> SELECT unprocessed --> ledger / email / analytics\nWorker --> mark processed (idempotent on event_id)" },
+        { "type": "text", "text": "**Structure**\n- **Ingest handler** — verify signature, insert event, ack. Nothing else.\n- **`inbox` table** — raw payload + `event_id UNIQUE` + `processed_at`. The durability boundary and the dedupe key.\n- **Worker** — claims unprocessed rows, runs the downstream updates, marks processed. Separate process so its failures never touch the ack path.\n\n**One-way door to note:** the `event_id` uniqueness contract — pick the provider's stable id now; changing the dedupe key later means reconciling history. Everything else (poll → queue) stays cheaply reversible." }
+      ]
+    }
+  ]
+}

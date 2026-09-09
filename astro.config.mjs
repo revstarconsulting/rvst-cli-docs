@@ -25,6 +25,7 @@ export default defineConfig({
             { label: 'What is rvst-cli?', slug: 'start/overview' },
             { label: 'Install', slug: 'start/install' },
             { label: 'Link a Project', slug: 'start/link' },
+            { label: 'Try Kiro', slug: 'start/try-kiro' },
           ],
         },
         {

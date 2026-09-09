@@ -1,0 +1,112 @@
+{
+  "id": "lifecycle",
+  "title": "Story 136662",
+  "subtitle": "A vibe session: pull a user story from ADO, route it to the code agent, review, hand off the backend, and file a protocol-compliant delivery task.",
+  "model": "Claude Sonnet 5",
+  "effort": "High",
+  "mode": "Vibe",
+  "autopilot": true,
+  "capability": "code",
+  "stepped": true,
+  "note": "Condensed from a real Kiro session (User Story 136662) — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "stage": "Pull the story",
+      "blocks": [
+        { "type": "text", "text": "Lets work on the next request. Pull context from user story 136662. And kick off the /code agent" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "kiro_powers", "summary": "Fetch ADO user story #136662 context", "detail": "US #136662: Demo - Turn Meeting Recording into Action Items\nUpload a recording or paste a transcript, see auto-extracted action items in a todo list.\nFrontend AC: self-contained ActionItems client component, drop zone (.mp3/.mp4/.m4a/.webm) + transcript textarea, 2s loading, MUI table, Todo->Done toggle, route /dashboard/action-items." },
+        { "type": "tool", "name": "read_file", "summary": "Inspect project scaffold", "detail": "package.json: bare Next.js 15 scaffold\nsrc/app/page.tsx, tsconfig.json read\n=> no MUI or react-dropzone installed yet" },
+        { "type": "text", "text": "The project is a bare **Next.js 15** scaffold with no MUI or react-dropzone yet, but the acceptance criteria call for both. Routing this to the **code agent**." },
+        { "type": "tool", "name": "spawn (code agent)", "summary": "Delegate implementation planning to /code", "detail": "Code agent proposes a plan and asks for confirmation." },
+        { "type": "text", "text": "**Plan for #136662:**\n1. Branch `feat/136662-meeting-action-items`\n2. Install MUI + react-dropzone\n3. `src/components/ActionItems.tsx` — drop zone, transcript textarea, 2s CircularProgress, MUI Table, per-row Todo↔Done Switch\n4. `src/app/dashboard/action-items/page.tsx` route\n5. Verify with `npm run build`\n\nWant me to tell it to go ahead?" }
+      ]
+    },
+    {
+      "role": "user",
+      "stage": "Approve the plan",
+      "blocks": [
+        { "type": "text", "text": "Go ahead" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "spawn (code agent)", "summary": "Run implementation on feat/136662-meeting-action-items", "detail": "Branch created (repo's first commit — main had no history).\nDeps pinned: @mui/material@9.3.1, @emotion/react@11.14.0, @emotion/styled@11.14.1, react-dropzone@20.1.1.\nHit two MUI v9 API breaks (Stack alignItems->sx; Switch inputProps->slotProps.input) and fixed both.\nnpm run build compiles and type-checks cleanly." },
+        { "type": "diff", "file": "src/components/ActionItems.tsx", "hunks": [
+          { "type": "add", "text": "\"use client\";" },
+          { "type": "add", "text": "// Drop zone (.mp3/.mp4/.m4a/.webm) + transcript textarea" },
+          { "type": "add", "text": "// 2s simulated CircularProgress, then MUI Table of 6 mock items" },
+          { "type": "add", "text": "// per-row Switch toggles status Todo <-> Done" }
+        ] },
+        { "type": "diff", "file": "src/app/dashboard/action-items/page.tsx", "hunks": [
+          { "type": "add", "text": "import { ActionItems } from \"@/components/ActionItems\";" },
+          { "type": "add", "text": "export default function Page() { return <ActionItems />; }" }
+        ] },
+        { "type": "text", "text": "Done. **Branch `feat/136662-meeting-action-items`**. Created `src/components/ActionItems.tsx` (self-contained client component) and `src/app/dashboard/action-items/page.tsx`. Build passes cleanly (`npm run build` ✓)." }
+      ]
+    },
+    {
+      "role": "user",
+      "stage": "Review the changes",
+      "blocks": [
+        { "type": "text", "text": "Lets review the changes" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "readFile", "summary": "Re-read the implementation for review", "detail": "src/components/ActionItems.tsx\nsrc/app/dashboard/action-items/page.tsx" },
+        { "type": "text", "text": "**Review — #136662: all 8 acceptance criteria met ✓**\n\n**Strengths:** clean TypeScript (no `any`), correct MUI v9 patterns (`slotProps.input`, `sx`), `useCallback` memoization, file-rejection handling, accessible table `aria-label`.\n\n**Issues to consider:** (Medium accessibility) drop zone `<Paper>` acts as a button but lacks a visible focus ring / `role=\"button\"`; error message isn't announced — wrap in `aria-live` or use MUI `Alert`. (Minor) mock due dates are in 2025 (past)." }
+      ]
+    },
+    {
+      "role": "user",
+      "stage": "Hand off the backend",
+      "blocks": [
+        { "type": "text", "text": "There is a backend change in the acceptance criteria. Lets create a handoff for my backend agent" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "disclose_context", "summary": "Assemble backend handoff from the AC", "detail": "Frontend uses a simulated 2s delay + mock data in place of a real API call." },
+        { "type": "text", "text": "**Handoff — Meeting Recording → Action Items (Backend)**\n\nBackend needs `POST /api/action-items/extract` accepting `multipart/form-data` with either a `file` (audio/video) OR a `transcript` string, returning `{ items: ActionItem[] }`. `ActionItem` = { id, description, assignee, priority, dueDate, status }. Once ready, the frontend swaps the mock for this endpoint." }
+      ]
+    },
+    {
+      "role": "user",
+      "stage": "Summarize for delivery",
+      "blocks": [
+        { "type": "text", "text": "Lets deliver these frontend changes. First create a summary of what was done. I prefer the /breakdown summary" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "shell", "summary": "Confirm the commit on the branch", "detail": "$ git log --oneline -5\n9467513 (HEAD -> feat/136662-meeting-action-items) feat: add action items component with drop zone and mock data" },
+        { "type": "text", "text": "## Summary\nAdded a **Meeting Action Items** page — upload a recording or paste a transcript, see extracted action items. Mock data with a simulated delay, ready for backend integration.\n\n**Changes:** `src/components/ActionItems.tsx` (drop zone + transcript + table), `src/app/dashboard/action-items/page.tsx` (route), and deps `@mui/material@9.3.1` + Emotion peers + `react-dropzone@20.1.1` in `package.json`.\n\n**Testing:** `npm run build` passes with no type errors; reviewed for security/TS/accessibility.\n\n**Risks:** mock data only (no real AI extraction); backend `POST /api/action-items/extract` handed off separately; no persistent storage." }
+      ]
+    },
+    {
+      "role": "user",
+      "stage": "Fix delivery to protocol",
+      "blocks": [
+        { "type": "text", "text": "The task created wasnt following protocol. Lets deliver the summary again as a child task under this user story, where the activity is \"Software Development\" and team code is \"RVST\". Dont delete the created task. The Role is Dev. Do you have my name?" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "kiro_powers", "summary": "Read delivery protocol from steering, then create the child task in ADO", "detail": "Protocol: title `<Role> - <Full Name> - <MMDDYYYY>`, all time fields = 0, markdown description.\nField ref name is Custom.TeamCode." },
+        { "type": "text", "text": "Yes — from the ADO work item, you're **Ernesto Rodriguez**. Keeping the earlier task as requested and filing the corrected one." },
+        { "type": "text", "text": "Done. Child task created following protocol: **Task #136939** — `Dev - Ernesto Rodriguez - 08202026`, parent User Story #136662, Activity **Software Development**, Team Code **RVST**, all time fields 0, markdown description, State New." }
+      ]
+    }
+  ]
+}

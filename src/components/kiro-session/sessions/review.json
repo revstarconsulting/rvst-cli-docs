@@ -1,0 +1,37 @@
+{
+  "id": "review",
+  "title": "Code Review",
+  "subtitle": "Pre-PR review of a token-auth middleware — security, correctness, mentoring.",
+  "model": "Claude Opus 4.8",
+  "effort": "High",
+  "mode": "Default",
+  "autopilot": true,
+  "capability": "review",
+  "note": "Illustrative demo grounded in the revstar/kiro review skill — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "blocks": [
+        { "type": "text", "text": "Review this before I open the PR — is it ready?" },
+        { "type": "code", "lang": "js", "text": "async function requireAuth(req, res, next) {\n  const token = req.headers.authorization;\n  const payload = jwt.decode(token);\n  if (payload.userId) {\n    req.user = await db.query('SELECT * FROM users WHERE id = ' + payload.userId);\n    next();\n  }\n}" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "read", "summary": "Traced how requireAuth is mounted and what calls it", "detail": "middleware/auth.js — requireAuth\nroutes/*.js — mounted on all /api routes\ndb.js — query() interpolates raw SQL, no parameter binding\nNo signature or expiry verification anywhere in the chain" },
+        { "type": "text", "text": "**Overall assessment:** This **needs significant rework** before PR. The approach doesn't actually authenticate — it decodes an unverified token — and it opens a SQL injection path. These are foundational, so I'm flagging the design early rather than polishing details on top of it." },
+        { "type": "text", "text": "**Blocking issues**\n\n**1. No signature verification — auth is bypassable.**\n- *What:* `jwt.decode()` only base64-decodes; it never checks the signature or `exp`.\n- *Why it matters:* An attacker forges any payload (`{\"userId\": 1}`) with no secret and is authenticated as that user. Decode ≠ verify.\n- *Fix:* `jwt.verify(token, SECRET)` — validates signature AND expiry — inside a try/catch that returns 401 on failure.\n\n**2. SQL injection via string concatenation.**\n- *What:* `payload.userId` is interpolated straight into the query.\n- *Why it matters:* A crafted `userId` (`1 OR 1=1`) dumps the users table; this is a forgeable field, so it compounds issue #1.\n- *Fix:* Parameterize — also drops `SELECT *`." },
+        { "type": "diff", "file": "middleware/auth.js", "hunks": [
+          { "type": "del", "text": "const payload = jwt.decode(token);" },
+          { "type": "add", "text": "const payload = jwt.verify(token.replace(/^Bearer /, ''), SECRET);" },
+          { "type": "del", "text": "await db.query('SELECT * FROM users WHERE id = ' + payload.userId);" },
+          { "type": "add", "text": "await db.query('SELECT id, email, role FROM users WHERE id = $1', [payload.userId]);" }
+        ] },
+        { "type": "text", "text": "**Should fix**\n\n- *Missing-token & missing-user paths:* if the header is absent, `token` is `undefined` and `jwt.decode` throws; if `payload.userId` is falsy, the request neither calls `next()` nor responds — it hangs until timeout. Handle every path: 401 on no/invalid token, 401 on unknown user.\n- *`Authorization` header parsing:* strip the `Bearer ` prefix before verifying, or the token never validates." },
+        { "type": "text", "text": "**What's working**\n\nAttaching the resolved user to `req.user` is the right shape for downstream handlers, and keeping the DB lookup in the middleware (not trusting the client's claims) is the correct layer once the token is verified." },
+        { "type": "text", "text": "**Summary checklist**\n- [ ] Replace `jwt.decode` with `jwt.verify` (signature + expiry) in try/catch → 401\n- [ ] Parameterize the users query; drop `SELECT *`\n- [ ] Handle missing token / missing user with an explicit 401\n- [ ] Strip the `Bearer ` prefix before verifying\n\nWith 1 and 2 fixed this moves to **ready with minor changes**.\n\n`NEEDS_CHANGES`" }
+      ]
+    }
+  ]
+}

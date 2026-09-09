@@ -1,0 +1,35 @@
+---
+title: Try Kiro
+description: Interactive, replay-based demo sessions showing what Kiro does with the RevStar capabilities.
+---
+
+import KiroSession from '../../../components/kiro-session/KiroSession.astro';
+
+These are **replayed demo sessions** — a faithful mock of the Kiro chat window
+using recorded prompts and responses. Click **Run demo** to watch a session play
+out. Nothing runs live; it's here to show you the shape of a real Kiro
+interaction before you try it yourself.
+
+## A feature, end to end
+
+The full development lifecycle in one vibe session: pull a user story from Azure
+DevOps, route it to the `code` agent to implement, review the result, hand the
+backend work off, then file a protocol-compliant delivery task back in ADO. This
+is condensed from a **real** session (User Story 136662).
+
+<KiroSession session="lifecycle" />
+
+## A pre-PR code review
+
+The `review` skill reads for security and correctness first, orders findings by
+severity, and explains *why* each one matters — then gives a clear verdict.
+
+<KiroSession session="review" />
+
+## An architecture decision
+
+The `architecture` skill states its assumptions, recommends **one** approach
+(and says why), names the main alternative and when you'd switch to it, then
+sketches the structure and flags the one-way-door decision.
+
+<KiroSession session="architecture" />

@@ -1,0 +1,30 @@
+{
+  "id": "handoff",
+  "title": "Handoff",
+  "subtitle": "Generate a cross-repo context summary so the backend knows exactly what to implement.",
+  "model": "Claude Opus 4.8",
+  "effort": "High",
+  "mode": "Default",
+  "autopilot": true,
+  "capability": "handoff",
+  "note": "Illustrative demo grounded in the revstar/kiro handoff skill — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "blocks": [
+        { "type": "text", "text": "I'm done with the frontend for the action items page — it's on mock data. Generate a handoff for the backend team." }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        { "type": "tool", "name": "grep", "summary": "Scan the implementation for API calls, types, and mocks", "detail": "src/components/ActionItems.tsx\n  // TODO: replace mock with POST /api/action-items/extract\n  const items: ActionItem[] = MOCK_ITEMS   // simulated 2s delay\ninterface ActionItem { id, description, assignee, priority, dueDate, status }" },
+        { "type": "text", "text": "The frontend is wired against a mocked call with a fixed 2s delay. Here's the handoff — everything the backend needs to implement it from this document alone." },
+        { "type": "text", "text": "# Handoff: Meeting Action Items\n\n**Context**\nUpload a recording or paste a transcript, get back extracted action items. The frontend (`ActionItems.tsx`, route `/dashboard/action-items`) is complete but runs on mock data behind a simulated delay.\n\n**What the backend needs to provide** — one endpoint:" },
+        { "type": "code", "lang": "http", "text": "POST /api/action-items/extract\nContent-Type: multipart/form-data\n\n# exactly one of:\n  file:       audio/video upload (.mp3/.mp4/.m4a/.webm)\n  transcript: string\n\n200 -> { \"items\": ActionItem[] }" },
+        { "type": "code", "lang": "ts", "text": "interface ActionItem {\n  id: string;\n  description: string;\n  assignee: string;\n  priority: \"low\" | \"medium\" | \"high\";\n  dueDate: string;   // ISO 8601\n  status: \"todo\" | \"done\";\n}" },
+        { "type": "text", "text": "**Assumptions made**\n- Synchronous response is fine for the demo (frontend shows a spinner, no polling/job id yet). If extraction is slow, say so and we'll switch to a job + poll contract.\n- `dueDate` is optional in practice — the UI renders an em dash when absent.\n\n**Open questions**\n- Max upload size / accepted duration?\n- Auth: does this route take the standard bearer token, or is it public within the workspace?" }
+      ]
+    }
+  ]
+}

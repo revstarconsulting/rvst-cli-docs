@@ -1,0 +1,86 @@
+---
+title: Missions & the /goal loop
+description: Set a standing macro-goal for multi-phase work and drive it autonomously with the native /goal loop.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+A **mission** is the standing macro-goal for multi-phase work. Once set, it is
+re-injected at the start of every session so the objective survives context
+compaction — the agent can't drift or forget the plan halfway through.
+
+## Setting a mission
+
+Use the **`mission`** skill: "set this as the mission" or "track this as the
+mission" against a plan that spans multiple phases. It distills the macro-goal
+and writes a to-do list covering every phase.
+
+All mission state is read and written through **`mission-state.js`** — never by
+hand-editing a file. The `mission-state-protect` gate enforces this: it refuses
+a direct edit of mission state and refuses clearing an unaudited mission.
+
+## The `/goal` loop
+
+Kiro's native `/goal` command drives a mission autonomously: it keeps
+re-prompting the session until every success criterion is met, rather than
+stopping after one pass. Point it at a plan and it will keep working — building,
+auditing, running QA, fixing gaps — until the goal is genuinely done.
+
+## The acceptance ledger
+
+Every mission carries an **acceptance ledger** — one line per requirement,
+marked:
+
+- **MET**, with the evidence that proves it (a test result, a QA verdict, a
+  command output), or
+- **GAP**, with what's missing.
+
+A mission cannot clear while any ledger line reads GAP. This is what stops a
+mission from being marked done on narrative confidence alone — every claim
+needs a cited artifact.
+
+## Reversibility: when to stop and ask
+
+Most mid-mission forks are **two-way doors** — cheap to undo or redo. Decide
+them yourself, log what you chose and how to reverse it, and keep going.
+Stopping to ask about a reversible decision on an autonomous run burns time for
+a call that takes seconds.
+
+Stop only for a genuine **one-way door**:
+
+- money movement
+- auth or access changes
+- destructive or irreversible production data operations
+- external sends
+- schema migrations
+
+<Aside type="caution">
+Session length, context budget, or "a fresh start would be cleaner" are never
+reasons to stop a mission — it's designed to survive compaction.
+</Aside>
+
+## Ready-to-use prompts
+
+<Steps>
+
+1. **Build a plan end-to-end.** Paste this to kick off a full multi-phase build
+   as a pre-approved, self-driving mission:
+
+   ```text
+   /goal Implement ALL phases of the plan and set it as the mission using the mission skill (distill the macro-goal, create a to-do list covering EVERY phase, write the sentinel --preapproved). Pull the latest from the integration/staging branch first if the project has a remote. All phases are pre-approved: decide reversible forks yourself, log them, and do NOT stop to ask for permission. At the END of each phase, audit the built code against the plan and fill any gaps, THEN run the qa skill before starting the next phase. After all phases are built, re-run FULL QA across every phase, then set mission-state to audit and do a requirement-by-requirement audit against plan.md, fixing and re-QA-ing any gap. This goal is satisfied ONLY when every phase is built, all QA has passed, and mission-state.js has reached a clean audit and cleared. Do NOT call goal complete while any phase, gap, or QA failure remains. --max 50
+   ```
+
+2. **Work a bug-fixing backlog from evidence.** Paste this to drive fixes for a
+   documented set of issues, verified against the running app rather than
+   trusted on say-so:
+
+   ```text
+   /goal review the pdf files called "file path name" and view the screenshots in the pdfs in playwright mcp. then test these test cases yourself and if you can replicate the issue, resolve them. Do this for all of the issues in the document as well as the current task list items and verify each issue is resolved using QA protocol - if not fixed then keep trying to fix it and verify with playwright mcp until resolved. You must use a task list for each item and set a mission using the mission skill. Anything in the document is considered an active bug by the QA tester. Use sub-agents to review the videos and screenshots to avoid the 2000px limit in conversation. Also make sure to pull down the latest from staging before coding. --max 50
+   ```
+
+</Steps>
+
+<Aside type="tip">
+Both prompts set `--max` as a hard ceiling on `/goal` iterations. If the mission
+genuinely needs more passes, re-run with a higher cap rather than removing it.
+</Aside>

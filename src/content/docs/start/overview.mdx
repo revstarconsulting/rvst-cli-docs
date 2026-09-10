@@ -1,46 +1,61 @@
 ---
-title: What is rvst-cli?
-description: What the RevStar CLI is, and what it installs into your project.
+title: What is Kiro Workbench?
+description: A governed Kiro CLI setup — two repos, three agents, and four rules that keep autonomy safe.
 ---
 
-import { YouTubeEmbed } from '../../../components/YouTubeEmbed.astro';
+**Kiro Workbench** is a governed setup on top of the [Kiro](https://kiro.dev)
+CLI. It ships as **two repos**:
 
-`rvst-cli` is RevStar's internal command-line tool for expanding [Kiro](https://kiro.dev)
-with a shared, versioned set of capabilities. You install the CLI once, then
-run `rvst-cli link` inside any project to pull down the current **`revstar/kiro`**
-capability bundle from the registry.
+- **`rvst-cli`** — the Node CLI (`kiroctl`), its installers, and this
+  documentation.
+- **`rvst-registry`** — the content pack: agents, skills, gates, steering, the
+  mission system, and memory.
 
-## What gets installed
+`kiroctl` bootstraps the registry's content into Kiro's own config directory
+(`$KIRO_HOME`), so every Kiro session — in any project — picks up the same
+governed capability set.
 
-When you link a project, the CLI writes a set of files under `.kiro/` (and a
-`rvst.yaml` marker that tracks what it installed):
+## Four governing ideas
 
-| Kind | Where it lands | What it does |
-| --- | --- | --- |
-| **Agents** | `.kiro/agents/*.md` | Purpose-built assistants — `code`, `review`, `deliver`, `ado`, `skill-creator` |
-| **Skills** | `.kiro/skills/<name>/SKILL.md` | On-demand playbooks an agent loads when a task matches |
-| **Hooks** | `.kiro/hooks/*.json` | Triggers that route work to the right agent automatically |
-| **Steering** | `.kiro/steering/*.md` | Always-on context: standards, routing authority, secrets protection |
+**Inert until armed.** Installing changes nothing by itself. Gates — the
+enforcement layer — exist as scripts on disk but refuse nothing until you
+create their flag file. A pack that starts blocking the moment it lands teaches
+people to rip it out; this one earns trust one armed gate at a time.
 
-The bundle is **signed** — the CLI verifies the registry signature before
-installing, so you always get the exact, current capability set.
+**Opus orchestrates, Sonnet builds.** Three agents, three roles:
 
-:::note
-The `.kiro/` directory and `rvst.yaml` are added to your project's `.gitignore`
-by the CLI. Capabilities are delivered through the registry, not committed to
-your app repo.
-:::
+- **`dev`** — Opus-class. Plans, makes judgement calls, and drives the work.
+  Stays in the main session.
+- **`coder`** — Sonnet-class. Implements from a clear spec handed down by
+  `dev`.
+- **`scout`** — Sonnet-class, read-only. Cheap lookups — "where is X defined" —
+  without touching the main session's budget.
 
-## The mental model
+Model routing is pinned explicitly in each agent's configuration. Never
+Haiku-class, never `auto` — auto-routing can silently drop real work onto a
+weaker model.
 
-- **The registry** (`revstar/kiro`, currently **v0.7.0**) is the source of truth.
-- **`rvst-cli link`** is the one command that syncs it into your project.
-- **You customize freely** — the CLI never silently overwrites files you've
-  edited. See [Customize Without Losing It](/customize/customizing/).
+**Bolt-on, never subtract.** Updates add and extend; they don't silently remove
+or rewrite something you've customized. Your edits survive an update.
 
-{/* Replace VIDEO_ID with an unlisted YouTube ID once recorded. */}
-{/* <YouTubeEmbed id="VIDEO_ID" title="rvst-cli in 90 seconds" /> */}
+**Evidence before done.** Claims of "fixed" or "done" need evidence, not
+narrative confidence: root-cause the bug before patching it, prove a fix with a
+red (failing) case that turns green, and pass QA's two-gate verdict — a change
+must both **work** and **match the stated intent**.
+
+## Capabilities
+
+Everything the registry delivers falls into four kinds:
+
+| Kind | What it is |
+| --- | --- |
+| **Agents** | The three roles above — who you talk to and who does the work. |
+| **Skills** | On-demand protocols (QA, design, mission, architecture, review, and more) that load their full body only when a task matches. |
+| **Gates** | Enforcement scripts that block a specific tool call once armed — e.g. a direct push to a protected branch. |
+| **Steering** | Always-on context loaded on every turn — kept small and durable on purpose. |
+
+See [Capabilities](/capabilities/overview/) for the full breakdown of each.
 
 ## Next step
 
-Head to [Install](/start/install/) to get the binary onto your machine.
+Head to [Install](/start/install/) to clone both repos and run the bootstrap.

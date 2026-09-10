@@ -1,42 +1,59 @@
 ---
 title: Skills
-description: The on-demand playbooks each agent loads when a task matches.
+description: The 21 on-demand playbooks Kiro Workbench installs, grouped by purpose.
 ---
 
-A skill is a single `SKILL.md` playbook an agent loads **on demand** when your
-request matches its trigger. You don't invoke skills directly — the agent picks
-the right one. Skills are grouped by the agent that owns them.
+A skill is a playbook that loads **on demand** — its metadata is available at
+startup, but its full body only loads into context when your request matches
+its trigger. You don't invoke skills directly; the active agent picks the one
+that fits, most often `dev`.
 
-## Code agent skills
+## Engineering
 
 | Skill | When it fires |
 | --- | --- |
-| `context` | **Mandatory** on every new task — gather context, ask questions, present a plan, get approval, then code. |
-| `code` | Writing/implementing/creating code — functions, features, endpoints, modules. |
+| `context` | Start of a fresh implementation task — gather context, resolve unknowns, plan, then build. |
+| `code` | Writing or implementing code — functions, features, endpoints, modules. |
 | `debug` | A bug, error, failing test, or unexpected behavior needs root-cause analysis. |
-| `refactor` | Restructure without behavior change — "clean this up", "extract", "rename", "reduce duplication". |
-| `handoff` | Summarize what one side of a full-stack feature built, so the sibling repo knows what to implement. |
+| `refactor` | Restructuring without changing behavior — "clean this up", "extract", "rename". |
+| `review` | Pre-PR review focused on security, correctness, and performance. |
+| `architecture` | System design decisions — structure, boundaries, data flow, technology choices. |
+| `standards` | Enforcing or evolving team coding conventions. |
+| `estimate` | Scope and risk assessment before starting significant work. |
 
-## Review agent skills
-
-| Skill | When it fires |
-| --- | --- |
-| `review` | Pre-PR review — security, correctness, performance. "review this", "is this ready for PR". |
-| `architecture` | Design decisions — "how should I structure this", "should we use X or Y". |
-| `estimate` | Scope and risk — "how long will this take", "what are the risks". |
-| `standards` | Coding standards and conventions — "what's our pattern for Y". |
-
-## Deliver agent skills
+## Delivery & comms
 
 | Skill | When it fires |
 | --- | --- |
-| `breakdown` | PM-friendly task breakdown of code changes — the default "summarize" / "deliver". |
-| `changelog` | Release notes from diffs or commit history — "what shipped". |
-| `status` | Client-facing status updates for stakeholders — "write a status email". |
+| `breakdown` | PM-friendly task breakdown of code changes, specs, or completed work. |
+| `changelog` | Release notes and changelogs from diffs or commit history. |
+| `status` | Client-facing status updates from vault state and recent work. |
+| `handoff` | Session context summary for handing work off to a sibling project/repo. |
+| `submit` | The pre-PR pipeline — secret scan, gates, review, then commit/push/PR. |
 
-## Custom skills
+## Autonomy, QA & design
 
-You can add your own — the `skill-creator` agent drafts one for you. See
-[Author Your Own Skill](/customize/authoring-skills/). Custom skills live at
-`.kiro/skills/<name>/SKILL.md` and are tracked in `rvst.yaml` once you register
-them via `rvst-cli link`.
+| Skill | When it fires |
+| --- | --- |
+| `mission` | Setting, updating, or clearing the standing macro-goal for multi-phase work. |
+| `qa` | Running the QA protocol against staging — scoped, full, or "today". |
+| `design` | Building or restyling any UI surface with the project's design system and full state set. |
+| `grill-me` | Adversarial interrogation of a plan or design until every gap is resolved. |
+
+## Azure DevOps, KB & authoring
+
+| Skill | When it fires |
+| --- | --- |
+| `ado-telemetry` | Read-only Azure DevOps pulls — sprint status, work items, roadmap. |
+| `ado-write` | Creating or updating Azure DevOps work items to exact conventions. |
+| `kb` | Regenerating the project's living knowledge base — architecture, ERD, API, infra docs. |
+| `skill-creator` | Authoring a new skill — interviews you and drafts a well-formed `SKILL.md`. |
+
+## Registering a custom skill
+
+```sh
+kiroctl onboard --kind skill --name <name> --source <path>
+```
+
+This is governance-gated — `kiroctl doctor --governance` checks that a
+registered skill is well-formed before it's trusted alongside the built-in 21.

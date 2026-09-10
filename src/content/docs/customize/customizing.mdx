@@ -1,44 +1,55 @@
 ---
-title: Customize Without Losing It
-description: Edit skills and agents freely — the CLI never silently overwrites your changes.
+title: Customize without losing it
+description: Bolt-on, never subtract — kiroctl sync and update never destroy your edits.
 ---
 
-The whole point of the delivery model is that you **customize** the capabilities
-for your project. The CLI is built so a later `rvst-cli link` never destroys
-your edits.
+import { Aside } from '@astrojs/starlight/components';
 
-## How upgrades handle your edits
+## Philosophy: bolt-on, never subtract
 
-The CLI records a content hash of every file it installs. On the next `link`
-after a new registry version:
+Kiro Workbench is designed to be customized in place. Steering, skills, and
+agents in your project are yours to edit — the tooling is built so that
+pulling in a newer version of the registry **adds and updates**, it never
+silently removes or overwrites work you've done.
 
-- **Files you never touched** update silently to the new version.
-- **Files you edited since install** are protected:
-  - **Interactive run** — you get a per-file prompt: **keep**, **overwrite**, or
-    view a **diff** (a `[d]iff` loop shows exactly what changed upstream vs.
-    your version).
-  - **Non-interactive run** (e.g. CI) — the CLI keeps your version and warns.
-    It never clobbers silently.
+## Updating is conflict-safe
 
-This means you can safely tune an agent's tone, tweak a skill's steps, or fill
-in a steering file, and know an upgrade won't wipe it out.
+**`kiroctl sync`** (and `kiroctl update`) are the mechanisms that pull registry
+changes into a project, and both are **edit-preserving**:
 
-## What's safe to edit
+- Every installed file has a **content hash** recorded at install/onboard time.
+- On sync, a file whose hash still matches what was delivered updates
+  silently — you never touched it, so there's nothing to protect.
+- A file whose hash has **changed** — because you edited it — is treated as a
+  conflict. You get a **keep / overwrite / diff** choice per file rather than
+  either side winning by default.
 
-- **Steering** — fill in `product.md`, `tech.md`, `structure.md`; adjust
-  standards if your project genuinely diverges.
-- **Skills** — tune the steps or triggers of any `SKILL.md`.
-- **Agents** — adjust an agent's instructions, welcome message, or skill list.
+This is what makes it safe to tune an agent's instructions, adjust a skill's
+trigger phrasing, or fill in a steering file's project-specific sections, and
+still take future registry updates without losing that work.
+
+<Aside type="note">
+There is no `link` command in this CLI. Getting the bundle into a project
+happens at `kiroctl project new` / `kiroctl open` time, and staying current
+after that is `kiroctl sync`.
+</Aside>
+
+## What's safe to customize
+
+- **Steering** — durable, project-specific facts and standards.
+- **Skills** — the trigger phrasing and steps of any `SKILL.md`.
+- **Agents** — an agent's instructions, model pin, or skill list.
 
 ## Recommended workflow
 
-1. Edit the file you want to customize.
-2. Keep the change small and purposeful — you'll be re-reading it at each
-   upgrade diff.
-3. On the next `rvst-cli link`, choose **diff** to see what upstream changed,
-   then **keep** or merge deliberately.
+1. Edit the file directly — no special mode needed.
+2. Keep changes scoped and purposeful; you'll be reviewing them again at the
+   next `sync` diff.
+3. Next time you run `kiroctl sync`, choose **diff** on anything flagged as
+   changed, and decide **keep** or take the upstream version deliberately.
 
-:::tip
-If you find yourself making the *same* customization in every project, that's a
-signal it should go **into the registry** instead. Raise it so everyone gets it.
-:::
+<Aside type="tip">
+If you find yourself making the same customization on every project, that's a
+sign it belongs in the registry itself rather than as a per-project edit. Raise
+it so everyone gets it by default.
+</Aside>

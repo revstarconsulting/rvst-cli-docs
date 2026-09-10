@@ -1,0 +1,85 @@
+---
+title: QA & Design
+description: The render-backed QA protocol and the design skill's full component state coverage.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Running QA
+
+Say the trigger phrase and the `qa` skill runs the matching scope:
+
+| Phrase | Scope |
+| --- | --- |
+| "do QA" | Scoped to the latest change |
+| "full QA" | Complete audit of the product surface |
+| "QA today" | Everything changed today |
+
+## The three non-negotiables
+
+1. **Staging, never production.** QA runs against a staging environment, full
+   stop.
+2. **Every page with UI is rendered in a real browser.** A fetch or a `200`
+   status is not a check — it false-passes blank heroes, covered text, broken
+   contrast, and missing sections. The **`qa-render-gate`** enforces this: it
+   blocks a fetch-only verification during an active QA pass and requires an
+   actual render.
+3. **Two-gate verdicts.** Every change-related check needs both:
+   - **WORKS** — the functionality behaves correctly.
+   - **MATCHES INTENT** — it's what was actually asked for.
+
+   A change that works but isn't what was asked for is a **FAIL** — wrong
+   target, wrong behavior, over-delivery, or under-delivery all count.
+
+<Aside type="note">
+Intent is written down **before** the implementation is read, so the verdict
+isn't quietly rationalized around whatever got built.
+</Aside>
+
+## Full-run coverage
+
+A full QA run has to prove it actually covered everything, not just assert it
+did. **`qa-coverage-receipt.js`** is the coverage oracle: it reconciles what was
+tested against the product's test registry and emits `COVERAGE-OK` only when
+every item is accounted for. The **`qa-report-gate`** blocks a written QA report
+that's missing intent verdicts, render evidence, or that coverage receipt.
+
+## Definition of done
+
+Done means a **filed, human-verified checklist** — not the agent's own say-so.
+The agent that built or fixed something cannot self-certify that it's QA'd;
+the checklist has to be produced and then actually verified against the running
+app.
+
+<Aside type="caution">
+"The data doesn't exist" is never a skip reason. Create the test data, run the
+check, clean it up afterward.
+</Aside>
+
+## The `design` skill
+
+Reach for `design` when building or changing any front-end surface —
+components, layouts, pages, forms, flows, styles, or theme. It:
+
+- **Reuses the project's own design system** rather than inventing a second
+  one.
+- Enforces the **full component state set** for every component:
+  - default
+  - hover
+  - focus
+  - disabled
+  - loading
+  - empty
+  - error
+
+Loading, empty, and error are the three that hide dead-ends — a component that
+only has its default state looks finished and isn't. `design` builds it right;
+QA proves the states exist and lead somewhere.
+
+## Code-only work is a different lane
+
+Work with no product surface — tooling, internal scripts, backend-only logic
+with no UI impact — is verified by its own test suite (red-green: a failing
+test that now passes, and the adjacent case re-checked), not by the browser
+protocol above. Don't run a full QA reconciliation against product test
+coverage for a change the product surface never touched.

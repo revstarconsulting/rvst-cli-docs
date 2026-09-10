@@ -13,18 +13,18 @@ export default defineConfig({
   base,
   integrations: [
     starlight({
-      title: 'RevStar CLI Tutorials',
+      title: 'Kiro Workbench Docs',
       description:
-        'Install rvst-cli, link a project, and get value from the delivered Kiro capabilities — agents, skills, hooks, and steering.',
+        'Install kiroctl, bind a client-scoped project, and use the delivered Kiro capabilities — agents, skills, gates, steering, missions and QA.',
       // Pagefind full-text search is on by default for static builds.
       social: [],
       sidebar: [
         {
           label: 'Start Here',
           items: [
-            { label: 'What is rvst-cli?', slug: 'start/overview' },
+            { label: 'What is Kiro Workbench?', slug: 'start/overview' },
             { label: 'Install', slug: 'start/install' },
-            { label: 'Link a Project', slug: 'start/link' },
+            { label: 'Your first project', slug: 'start/first-run' },
             { label: 'Try Kiro', slug: 'start/try-kiro' },
           ],
         },
@@ -34,8 +34,16 @@ export default defineConfig({
             { label: 'Overview', slug: 'capabilities/overview' },
             { label: 'Agents', slug: 'capabilities/agents' },
             { label: 'Skills', slug: 'capabilities/skills' },
-            { label: 'Hooks', slug: 'capabilities/hooks' },
+            { label: 'Gates', slug: 'capabilities/gates' },
             { label: 'Steering', slug: 'capabilities/steering' },
+          ],
+        },
+        {
+          label: 'Workflows',
+          items: [
+            { label: 'Missions & /goal', slug: 'workflows/missions' },
+            { label: 'QA & Design', slug: 'workflows/qa-and-design' },
+            { label: 'Azure DevOps power', slug: 'workflows/azure-devops' },
           ],
         },
         {

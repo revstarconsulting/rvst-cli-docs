@@ -1,46 +1,48 @@
 ---
 title: Steering
-description: The always-on context files that shape every task.
+description: The five always-on rule files every agent loads on every turn.
 ---
 
-Steering files are Markdown documents installed at `.kiro/steering/*.md` with
-`inclusion: always` — they are loaded into context on **every** task, not on
-demand. They are how RevStar conventions travel with the project.
+Steering files are loaded into context on **every turn**, not on demand — a
+standing token cost. That's why there are only five, each short and durable.
+Anything situational belongs in a skill instead, loaded only when triggered.
 
-## `revstar-standards` (always on)
+## `00-conduct`
 
-The engineering rulebook every agent follows:
+Be critical by default: challenge assumptions and name risks before offering
+improvements. Evidence before "done" — root-cause first, one hypothesis at a
+time, red-green verification, both directions checked, siblings swept. Report
+outcomes faithfully, including partial or skipped work, without hedging.
 
-- **Branch naming** — `<type>/<ado-id>-<short-description>`, where type is
-  `feat` / `bugfix` / `hotfix` / `chore` / `refactor`.
-- **Commit messages** — `type: description`, lowercase, imperative, no
-  parenthetical scope, ≤72 chars.
-- **PR titles & description** — mirror the commit format with `(#ADO-ID)`, plus
-  a Summary / Work Item / Changes / Testing template.
-- **Spec naming** — `<ado-ticket>-<taskname>`, confirmed with you before
-  generation.
-- **Definition of Done** — a 6-point checklist (acceptance criteria, tests,
-  clean build, review, ticket updated, PR opened).
+## `10-token-efficiency`
 
-## `routing-authority` (always on)
+Delegate gathering to sub-agents and keep judgement — synthesis and validation
+stay in the main session, never the gathering itself. Model routing: Opus
+orchestrates, Sonnet builds, never Haiku, never `auto`. Defines the
+inline-only carve-out — paid-API bulk loops, bulk production writes, and
+irreversible migrations run inline from the main session, never delegated.
 
-Declares that project-level agents (`code`, `review`, `deliver`, `ado`) take
-precedence over any global agents, and maps old global names to the project
-equivalents. This is what keeps the correct, versioned agents in charge.
+## `20-engineering`
 
-## `secrets-protection` (always on)
+Reuse before you create — search by behavior, not filename, and extend the
+existing owner of a concern. Fix at the owning layer, then sweep for sibling
+implementations. Branch and PR discipline: never commit directly to a
+protected branch, verify the build before pushing. ADO work reporting is
+standard practice, not something to ask permission for.
 
-A hard guardrail: never read `.env`, `*.pem`, `*.key`, credential files, etc.;
-never echo secret values; reference secrets by key name; check staged files for
-secrets before commit; `.env.example` placeholders are allowed.
+## `30-qa-and-mission`
 
-## `product` / `tech` / `structure` (template stubs)
+When to invoke `design`, `qa`, and `mission` — automatically after front-end
+or functionality changes, and at the end of any mission phase that changed
+product surface. The three QA non-negotiables: staging never production,
+every page rendered in a real browser, and two-gate verdicts (`WORKS` +
+`MATCHES INTENT`). The reversibility rule for mid-mission forks: two-way doors
+get decided and logged, only genuine one-way doors — money, auth, destructive
+production operations, external sends, schema migrations — stop the run.
 
-Three project-specific steering files ship as **empty templates** for you to
-fill in — product purpose, tech stack, and directory/architecture conventions.
-Fill them by editing directly, or ask Kiro:
+## `40-secrets`
 
-> "fill in my project steering files based on the codebase"
-
-Filling these is the highest-leverage customization — it gives every agent
-project-specific context on top of the always-on RevStar standards.
+Never read, display, or expose secrets or credentials — `.env` files, key
+files, credential stores, tokens. Redact secret values from any command output
+or file content before showing it. Reference a secret by its key name, never
+its value.

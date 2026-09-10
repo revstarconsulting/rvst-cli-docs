@@ -1,51 +1,96 @@
 ---
 title: Try Kiro
-description: Interactive, replay-based demo sessions showing what Kiro does with the RevStar capabilities.
+description: A short walkthrough of a first session — planning, delegating, QA, and setting a mission.
 ---
 
-import KiroSession from '../../../components/kiro-session/KiroSession.astro';
+Once `kiroctl open --dir ~/kiro/acme --run` has logged you in and launched Kiro,
+you're in a chat session running the `dev` agent by default. Here's a typical
+first session.
 
-These are **replayed demo sessions** — a faithful mock of the Kiro chat window
-using recorded prompts and responses. Click **Run demo** to watch a session play
-out. Nothing runs live; it's here to show you the shape of a real Kiro
-interaction before you try it yourself.
+## Switch to `dev`
 
-## A feature, end to end
+`dev` is the default agent, but it's worth knowing how to switch explicitly —
+you'll do this after delegating work to `coder` or `scout`:
 
-The full development lifecycle in one vibe session: pull a user story from Azure
-DevOps, route it to the `code` agent to implement, review the result, hand the
-backend work off, then file a protocol-compliant delivery task back in ADO. This
-is condensed from a **real** session (User Story 136662).
+```
+/agent dev
+```
 
-<KiroSession session="lifecycle" />
+## Ask `dev` to plan a change
 
-## A pre-PR code review
+`dev` doesn't jump straight to code. For a new feature or an unfamiliar area,
+it applies the `context` skill to gather what it needs and the `architecture`
+skill if the request involves a design decision, then presents a plan before
+touching anything:
 
-The `review` skill reads for security and correctness first, orders findings by
-severity, and explains *why* each one matters — then gives a clear verdict.
+```
+Add pagination to the /users API endpoint.
+```
 
-<KiroSession session="review" />
+`dev` reads the existing endpoint and data layer, then comes back with a short
+plan — where the limit/offset params go, how the response shape changes —
+before writing any code.
 
-## An architecture decision
+## Delegate implementation to `coder`
 
-The `architecture` skill states its assumptions, recommends **one** approach
-(and says why), names the main alternative and when you'd switch to it, then
-sketches the structure and flags the one-way-door decision.
+Once the plan is clear, `dev` delegates the well-specified parts to `coder`
+(Sonnet-class) rather than implementing everything itself in the expensive
+orchestration model:
 
-<KiroSession session="architecture" />
+```
+Looks good — go ahead and implement it.
+```
 
-## A cross-repo handoff
+`dev` hands `coder` a scoped spec, `coder` builds it, and `dev` reviews what
+comes back before considering the change complete.
 
-The `handoff` skill scans what the frontend actually built — API calls, types,
-mocks — and produces a document the backend can implement from directly: the
-exact endpoint, the data contract, and the assumptions made.
+## Run QA
 
-<KiroSession session="handoff" />
+After a front-end or functionality change, run the QA protocol:
 
-## A stakeholder breakdown
+```
+do QA
+```
 
-The `breakdown` skill turns a diff into a PM-friendly summary — plain-language
-changes with file references, what was tested, and the risks — ready to paste
-into a ticket.
+This scopes to your latest change and checks two things for every affected
+behavior: that it **works**, and that it **matches the stated intent**. A
+change that works but wasn't what you asked for is still a fail.
 
-<KiroSession session="breakdown" />
+For a full audit instead of a scoped check:
+
+```
+full QA
+```
+
+## Set a mission for multi-phase work
+
+For anything spanning multiple phases — where the overall objective would
+otherwise get lost across a long session — set a mission:
+
+```
+Track this as the mission: migrate the reporting service to the new billing API, in phases.
+```
+
+The mission is re-injected every session so it survives context compaction, and
+it outranks whatever's immediately in front of you — `dev` works the mission
+instead of drifting to the nearest task. Reversible decisions get made and
+logged as the mission progresses; only genuine one-way doors (money movement,
+auth changes, destructive production operations, schema migrations) stop the
+run to ask you.
+
+To drive a mission autonomously across turns rather than one prompt at a time,
+use the native `/goal` loop in your kiro-cli session — it re-prompts the session
+each turn until the mission's acceptance ledger is clean:
+
+```text
+/goal Drive the active mission to completion: re-read the mission and task list,
+do the next increment, run the qa skill at the end of any phase that changed
+product surface, and log reversible decisions. Satisfied only when every phase
+is built, QA passed, and mission-state shows a clean audit — then clear the
+mission and complete the goal. --max 50
+```
+
+You bootstrap the whole thing with one `/goal` whose description says *"read the
+plan, set it as the mission via the mission skill, then drive all phases to
+completion"* — turn one sets the mission, the loop drives the rest. (See
+[Missions & the /goal loop](../../workflows/missions/) for ready-to-use prompts.)

@@ -1,0 +1,77 @@
+---
+title: Gates
+description: The 9 enforcement hooks wired into the agents — inert until armed, and always fail open.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Gates are hooks wired into the agents' tool calls. Two properties hold for all
+nine, without exception:
+
+- **Inert until armed.** A gate does nothing until a `.enabled` flag file
+  exists for it. Arm one globally or per project:
+
+  ```sh
+  touch ~/.kiro/gates/<name>.enabled          # everywhere
+  touch <project>/.kiro/gates/<name>.enabled  # this project only
+  ```
+
+  The two inject-only gates (`mission-inject`, `mission-turn-recorder`) can
+  also be armed together with:
+
+  ```sh
+  ./install.sh --arm-safe
+  ```
+
+- **Fails open.** A gate that errors or isn't armed never blocks the call it
+  would otherwise inspect. An armed gate that doesn't fire is worse than no
+  gate at all, because it's trusted — arm one at a time and verify it.
+
+<Aside type="caution">
+An armed `block` gate does exactly what its row says and nothing more. If a
+gate should be stopping something and isn't, confirm the flag file exists
+before assuming the rule doesn't apply.
+</Aside>
+
+## The nine gates
+
+| Gate | Trigger | Kind | What it does |
+| --- | --- | --- | --- |
+| `mission-inject` | Session start | inject | Re-injects the active mission so it survives context compaction. |
+| `mission-turn-recorder` | Turn end | inject | Writes the turn receipt the `/goal` loop reads; a cleared mission emits a terminal stop. |
+| `mission-state-protect` | write / shell | block | Refuses hand-edits of mission state, receipts, or gate flags, and un-audited mission clears. |
+| `qa-render-gate` | fetch | block | Forces a real-browser render during QA instead of accepting a fetch as a visual check. |
+| `qa-report-gate` | write | block | Refuses a QA report missing `WORKS` + `MATCHES INTENT` verdicts, render evidence, or a coverage receipt. |
+| `git-protect-gate` | shell | block | Refuses direct commit/merge/push to protected branches and `--no-verify`; allows `gh pr`. |
+| `reuse-before-create-gate` | new-file write | soft | Warns once about a duplicate of an existing owner, then relents. |
+| `session-context` | Session start | inject | Injects a git snapshot into context. |
+| `update-notify` | Session start | inject | Reminds you when a newer version is available; rate-limited, fails open. |
+
+## Kinds
+
+- **inject** — adds context; never refuses a call.
+- **block** — can refuse the tool call outright if its rule is violated.
+- **soft** — warns once, then gets out of the way rather than blocking
+  repeatedly on the same finding.
+
+## Verifying gates
+
+Run the full self-test suite, which asserts every gate in both directions
+(should-fire and should-not-fire):
+
+```sh
+node kiro/gates/selftest.js
+```
+
+A clean run reports **60/60**. Scope it to one gate or get verbose output:
+
+```sh
+node kiro/gates/selftest.js qa
+node kiro/gates/selftest.js --verbose
+```
+
+To see the real payload a gate receives when it doesn't fire as expected:
+
+```sh
+KIRO_GATES_DEBUG=1 node kiro/gates/<gate>.js < /dev/null
+```

@@ -1,34 +1,30 @@
 ---
-title: Commands
-description: The rvst-cli command surface at a glance.
+title: Command reference
+description: The complete kiroctl command surface — 14 commands, one line each.
 ---
+
+`kiroctl` is the only CLI surface. The commands below are the complete set —
+there is no `link`, `unlink`, or `install @latest`.
 
 | Command | What it does |
 | --- | --- |
-| `rvst-cli link` | Install / upgrade the current capability bundle into the project. The sole sync command. |
-| `rvst-cli unlink` | Remove installed capabilities and the managed `.gitignore` block from the project. |
-| `rvst-cli install @latest` | Self-update the CLI binary from the CDN (separate from capabilities). |
-| `rvst-cli --version` | Print the installed CLI version. |
+| `kiroctl client add \| list \| rm` | Register, list, or remove clients. |
+| `kiroctl client set-pat --slug <s>` | Set that client's Azure DevOps PAT, read from stdin. |
+| `kiroctl project new --dir --client [--scaffold]` | Create a new client-bound project at `--dir`. |
+| `kiroctl open --dir [--run]` | Launch a project's Kiro session, optionally running a command on start. |
+| `kiroctl profile --dir [--platform iterm2\|linux] [--install]` | Generate (and optionally install) a terminal launch profile. |
+| `kiroctl doctor [--governance]` | Diagnose the local setup; `--governance` also checks capability governance rules. |
+| `kiroctl onboard --kind --name --source` | Register a custom skill, agent, or hook (`--kind skill\|agent\|hook`). |
+| `kiroctl sync [--target --ref]` | Pull registry updates into the project, edit-preserving. |
+| `kiroctl ado telemetry [--json]` | Read-only Azure DevOps sprint/work-item/roadmap snapshot. |
+| `kiroctl kb refresh [--dry-run]` | Regenerate the project's knowledge base. |
+| `kiroctl gui` | Launch the GUI. |
+| `kiroctl registry fetch \| verify` | Fetch or verify the signature of the capability registry. |
+| `kiroctl update [--check] [--registry <path>]` | Update kiroctl itself; `--check` reports without applying. |
+| `kiroctl version` | Print the installed `kiroctl` version. |
 
-## link vs. install
+## What doesn't exist
 
-They are separate on purpose:
-
-- **`link`** manages **capabilities** (agents, skills, hooks, steering) in a
-  project.
-- **`install`** manages the **CLI binary** itself.
-
-## Versioning
-
-The CLI binary and the capability registry version independently:
-
-- The CLI version is injected at build time from its git tag (e.g. `v0.4.1`).
-- The registry capability `revstar/kiro` has its own version (currently
-  `0.7.0`), recorded in your project's `rvst.yaml`.
-
-Check both:
-
-```sh
-rvst-cli --version   # CLI binary
-cat rvst.yaml      # installed capability version
-```
+- **No `link` / `unlink`.** Project binding happens at `kiroctl project new` /
+  `kiroctl open` time; staying current is `kiroctl sync`.
+- **No `install @latest`.** Updating the CLI itself is `kiroctl update`.

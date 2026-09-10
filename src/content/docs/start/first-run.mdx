@@ -1,0 +1,71 @@
+---
+title: Your first project
+description: Bind a client, scaffold a project, and launch Kiro through the SSO login it needs.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+## Why you can't just run `kiro-cli`
+
+A bare `kiro-cli` launch fails with:
+
+```
+profileArn is required
+```
+
+Kiro needs an AWS Identity Center (SSO) login before it can start a session,
+and that login is scoped to a specific client. `kiroctl` supplies this by
+launching through a **client-bound project** — a project directory tied to one
+client's Identity Center configuration — rather than launching Kiro directly.
+
+## Launch through a client-bound project
+
+<Steps>
+
+1. **Add the client.** This registers the client's Identity Center start URL
+   and region:
+
+   ```sh
+   kiroctl client add --name "Acme" --idc-url https://acme.awsapps.com/start --region us-east-1
+   ```
+
+2. **Create the project**, bound to that client:
+
+   ```sh
+   kiroctl project new --dir ~/kiro/acme --client acme --scaffold
+   ```
+
+3. **Open it.** This performs the client's Identity Center login and launches
+   the session:
+
+   ```sh
+   kiroctl open --dir ~/kiro/acme --run
+   ```
+
+   This logs you in via SSO, then launches `kiro-cli chat --agent dev` inside
+   the project directory.
+
+</Steps>
+
+## The easier path
+
+If you'd rather not drive this from a terminal, use the desktop **"Kiro - New
+Project"** launcher, or run:
+
+```sh
+kiroctl gui
+```
+
+Both walk you through the same client-add / project-new / open sequence with a
+graphical flow.
+
+<Aside type="note">
+Each client is one AWS Identity Center boundary with its own isolated
+credential store. Switching clients never mixes credentials — a project bound
+to one client cannot authenticate against another.
+</Aside>
+
+## Next step
+
+Continue to [Try Kiro](/start/try-kiro/) for a walkthrough of your first
+session.

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "description": "Tutorials site for the RevStar CLI (rvst-cli) and its capability registry",
+  "description": "Docs site for Kiro Workbench (kiroctl + the rvst-registry capability pack), v1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

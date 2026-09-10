@@ -1,32 +1,50 @@
 ---
-title: Capabilities Overview
-description: The four kinds of capability the registry installs, and how they fit together.
+title: Capabilities overview
+description: The capability kinds Kiro Workbench v1 installs, and how they layer together.
 ---
 
-The `revstar/kiro` bundle installs four kinds of capability. They layer on top
-of each other:
+Kiro Workbench installs four kinds of capability, plus two systems built on top
+of them. They layer on top of each other rather than working in isolation:
 
-- **[Steering](/capabilities/steering/)** — always-on context. Loaded on every
-  task. This is where standards and routing rules live.
-- **[Agents](/capabilities/agents/)** — the assistants you talk to. Each has a
-  role, a model, and a set of skills it can pull in.
+- **[Steering](/capabilities/steering/)** — always-on rules. Loaded into every
+  turn automatically, so it is kept to a handful of short files.
 - **[Skills](/capabilities/skills/)** — on-demand playbooks. An agent loads a
-  skill when the task matches its trigger.
-- **[Hooks](/capabilities/hooks/)** — automation. They route work to the right
-  agent without you naming it.
+  skill's body only when your request matches its trigger; the metadata is the
+  only part that costs anything up front.
+- **[Agents](/capabilities/agents/)** — the personas that use steering and
+  skills to do the work. Each has a fixed model and a fixed set of tools.
+- **[Gates](/capabilities/gates/)** — enforcement hooks wired into the agents.
+  Every gate is **inert until armed** with a `.enabled` flag file, and every
+  gate **fails open** — a crashing or unarmed gate never blocks you silently.
+
+## Two systems built on these primitives
+
+- **Missions** — a standing macro-goal for multi-phase work, kept alive across
+  context compaction by the `mission-inject` and `mission-turn-recorder` gates.
+  See the `mission` skill.
+- **Memory** — a knowledge base of durable environment facts and standing
+  preferences, indexed and retrieved on demand rather than loaded every turn
+  like steering is.
 
 ## How a task flows
 
-1. **Steering** is already in context (routing authority, RevStar standards).
-2. A **hook** may fire on your action and route to the correct **agent**.
-3. That **agent** loads the **skill** that fits the task.
-4. The agent does the work under the always-on **steering** rules.
+1. **Steering** is already in context — conduct, token efficiency,
+   engineering invariants, QA/mission triggers, secrets handling.
+2. You (or a mission) invoke a **skill** that matches the task; its body loads
+   only now.
+3. The active **agent** — `dev`, `coder`, or `scout` — carries out the skill
+   using the tools it's permitted.
+4. Any **gate** wired to that agent's tool calls enforces its rule, if armed.
 
 ## Current version
 
-The bundle is `revstar/kiro` **v0.7.0**. Everything on these pages reflects
-what that version installs. Check your own install with:
+This documentation reflects **Kiro Workbench v0.2.0**. Check what's actually
+installed:
 
 ```sh
-cat rvst.yaml
+kiroctl version
+kiroctl doctor
 ```
+
+`kiroctl doctor` also validates governance — model routing, gate wiring, and
+steering/skill integrity — in one pass.

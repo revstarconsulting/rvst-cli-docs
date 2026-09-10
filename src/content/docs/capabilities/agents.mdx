@@ -1,64 +1,67 @@
 ---
 title: Agents
-description: The five agents the registry installs and when to use each.
+description: The three agents Kiro Workbench installs, their models, and when to use each.
 ---
 
-Agents are the assistants you talk to. The bundle installs five, each scoped to
-a role with its own model and skill set.
+Kiro Workbench installs exactly three agents. Each is scoped to a role with a
+fixed model — never `auto`, never a Haiku-class model — and its own tool
+permissions.
 
-## `code` — senior software engineer
+## `dev` — the orchestrator
 
-Day-to-day implementation, debugging, and refactoring. Full tool access; owns
-the lifecycle from writing code through tests and verification.
+Model: **`claude-opus-4.8`**.
 
-- **Skills:** `context`, `code`, `debug`, `refactor`, `handoff`
-- **How it works:** always runs the `context` skill first on a new task —
-  reads steering, acceptance criteria, and scans code before planning.
-- **Contract:** it presents a plan and **waits for approval before writing
-  code**, and never auto-invokes review.
+Plans, debugs, drives missions, and runs QA. This is the agent that reasons and
+makes judgement calls; it delegates well-specified implementation work rather
+than doing all of it inline.
 
-Use it for: "implement X", "fix this bug", "refactor this module".
+- **Tools:** `read`, `write`, `shell`, `web`, `subagent`, `todo_list`, `goal`,
+  `@mcp`.
+- **Gates:** every gate in the system is wired to `dev` — mission, QA, git
+  protection, and reuse-before-create all fire from this agent's tool calls.
 
-## `review` — tech lead
+Use it for: "implement X", "why is this failing", "set this as the mission",
+"do QA", "review this design".
 
-Read-only code review, architecture decisions, estimation, and standards
-enforcement. Cannot write files or run commands — it analyzes and explains.
+## `coder` — implementation sub-agent
 
-- **Skills:** `review`, `architecture`, `estimate`, `standards`
-- **Verdict:** in a pipeline it ends with `APPROVED` or `NEEDS_CHANGES`.
+Model: **`claude-sonnet-5`**.
 
-Use it for: "review this diff", "is this design sound?", "scope this work".
+The sub-agent `dev` delegates to for well-specified builds. Builds exactly the
+spec it's handed — no scope expansion, no architectural decisions of its own —
+and stops to report back rather than guessing when it hits a genuine ambiguity
+or fork.
 
-## `deliver` — technical writer
+Use it for: implementation work delegated by `dev`, not invoked directly for
+open-ended tasks.
 
-Turns staged changes or completed work into PM-friendly summaries. Read-only —
-never modifies code, never pushes to ADO unless you explicitly ask.
+## `scout` — read-only lookups
 
-- **Skills:** `breakdown` (default), `changelog`, `status`
+Model: **`claude-sonnet-5`**.
 
-Use it for: "summarize what we did", "write release notes", "status update".
+Cheap file and symbol search — "where is X defined", "does this repo use Y".
+`write` and `shell` are denied, so it can gather but never change anything.
 
-## `ado` — Azure DevOps integration
+Use it for: fast lookups you'd otherwise burn `dev`'s context on.
 
-Fetches work-item context to set up a task, and pushes delivery summaries back
-as child tasks.
+## Model-routing rule
 
-- **Guardrails:** never logs time (all hour fields are always `0`), always uses
-  the exact task-title format `<Role> - <Full Name> - <MMDDYYYY>`, and never
-  auto-pushes tickets.
+Opus orchestrates, Sonnet builds. Never Haiku-class, never `auto`, for any
+agent in this set — silently falling back to a cheaper model is a known cause
+of quality misses that are hard to notice after the fact. This is enforced,
+not just documented:
 
-Use it for: "pull ADO-12345", "update the ticket with a summary".
+```sh
+kiroctl doctor --governance
+```
 
-## `skill-creator` — skill authoring assistant
+## Switching agents
 
-Interviews you about a new skill, drafts a well-formed `SKILL.md`, and tells you
-where it goes. Deliberately narrow — it authors skills, it is not a general CLI
-guide.
+```
+/agent dev
+/agent coder
+/agent scout
+```
 
-See [Author Your Own Skill](/customize/authoring-skills/).
-
-## Routing
-
-You usually don't pick an agent by hand — the `routing-authority` steering file
-and the hooks decide. See [Hooks](/capabilities/hooks/) and
-[Steering](/capabilities/steering/).
+You'll usually stay on `dev` — it delegates to `coder` and `scout` itself
+rather than requiring you to switch by hand.

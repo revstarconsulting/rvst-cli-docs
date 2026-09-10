@@ -1,0 +1,68 @@
+---
+title: Azure DevOps power
+description: Reporting and reading Azure DevOps work items through the ado-write and ado-telemetry skills.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+## It's a skill, not a router agent
+
+ADO integration is delivered as the **`ado-write`** skill — not a dedicated
+routing agent. Any agent that has the skill available can post an update; you
+don't need to switch context to a separate ADO-only assistant.
+
+The **`azure-devops`** MCP server is wired up automatically at install. Its
+tools are invoked through the `ado-write` skill, which knows RevStar's exact
+conventions for how a ticket should be written — the MCP server itself is just
+transport.
+
+## Writing conventions
+
+`ado-write` enforces the house format so tickets are consistent across the
+team:
+
+- **Hour fields are always `0`.** Time is owned by the PM in ADO. Effort is
+  reported **narratively** in the summary text, never as a structured hours
+  value.
+- **Exact daily task title:** `<Role> - <Full Name> - <MMDDYYYY>`, where `Role`
+  is `Dev`, `DevOps`, or `AI`.
+- **Field name is `Custom.TeamCode`** — not `RSCode`.
+- **Summary format** follows four sections: Summary, Changes, Notes, Testing.
+
+<Aside type="tip">
+Reporting progress to your daily task is **standard practice**, not something
+you opt into — as work happens, post the update. Only destructive or unusual
+edits (changing state, reassigning, editing someone else's item, deletes) are
+gated behind explicit confirmation.
+</Aside>
+
+## Setting your PAT
+
+The Personal Access Token is scoped **per client**, not global. Set it either:
+
+- from the **PAT field in the GUI**, or
+- from the CLI, piped in rather than passed as an argument:
+
+  ```sh
+  printf '%s' '<pat>' | kiroctl client set-pat --slug <client>
+  ```
+
+The token is stored in the OS keychain, falling back to a `0600`-permission
+file if no keychain is available. It's injected as the `AZURE_DEVOPS_PAT`
+environment variable at launch — it is **never** written into `mcp.json`.
+
+## Reading without writing
+
+For read-only lookups — current sprint, open work items, the epics/features
+roadmap — use the sibling:
+
+- `kiroctl ado telemetry`, or
+- the **`ado-telemetry`** skill from inside a session.
+
+<Steps>
+1. Confirm your PAT is set for the client: `kiroctl client list`.
+2. Pull a read-only snapshot: `kiroctl ado telemetry --json` (or just ask for
+   sprint status in-session).
+3. When you're ready to log work, let the agent invoke `ado-write` — don't
+   hand-edit the ticket format yourself.
+</Steps>

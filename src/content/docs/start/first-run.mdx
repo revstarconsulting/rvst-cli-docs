@@ -120,6 +120,9 @@ kiroctl project repos    --dir ~/kiro/acme
 kiroctl open             --dir ~/kiro/acme --run   # clones any missing, then launches
 ```
 
+A **single-repo** project opens the session **inside that repo**; a **multi-repo**
+project opens at the workspace with each repo as a subfolder.
+
 <Aside type="note">
 Cloning private repos uses your **existing git/GitHub credentials** (SSH or
 `gh`) — the client governs AWS/Kiro SSO, not GitHub. A URL with an embedded

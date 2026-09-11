@@ -157,8 +157,11 @@ const firstPrompt =
       for (let i = 0; i < words.length; i++) {
         p.innerHTML = md(words.slice(0, i + 1).join(' '));
         scroll();
-        await sleep(18);
+        await sleep(45);
       }
+      // Reading pause: hold the finished message on screen long enough to read
+      // before the next block/turn (scaled to length, capped).
+      await sleep(Math.min(words.length * 45, 2000) + 300);
     }
 
     function renderText(target: HTMLElement, text: string) {
@@ -245,22 +248,25 @@ const firstPrompt =
       }
       for (const block of turn.blocks || []) {
         if (block.type === 'text') {
-          if (turn.role === 'user') renderText(el, block.text);
-          else await typeText(el, block.text);
+          if (turn.role === 'user') {
+            renderText(el, block.text);
+            // Reading pause for the user's prompt (scaled to length, capped).
+            await sleep(Math.min(String(block.text).split(' ').length * 45, 1500) + 250);
+          } else await typeText(el, block.text);
         } else if (block.type === 'code') {
           renderCode(el, block);
-          await sleep(220);
+          await sleep(600);
         } else if (block.type === 'tool') {
           renderTool(el, block);
-          await sleep(320);
+          await sleep(550);
         } else if (block.type === 'diff') {
           renderDiff(el, block);
-          await sleep(220);
+          await sleep(600);
         } else if (block.type === 'estimate') {
           renderEstimate(el, block);
-          await sleep(220);
+          await sleep(600);
         }
-        await sleep(120);
+        await sleep(200);
       }
     }
 
@@ -344,7 +350,7 @@ const firstPrompt =
       const cp = checkpoints[current];
       for (const turn of cp.turns) {
         await playTurn(turn);
-        await sleep(180);
+        await sleep(600);
       }
       current++;
       playing = false;

@@ -11,8 +11,9 @@
  *   <KiroSession session="estimate" />
  *
  * Add a new demo by dropping a JSON file in ./sessions/ matching the shape in
- * the existing fixtures (estimate.json, bugfix.json).
+ * the existing fixtures (mission.json, lifecycle.json).
  */
+import mission from './sessions/mission.json';
 import lifecycle from './sessions/lifecycle.json';
 import review from './sessions/review.json';
 import architecture from './sessions/architecture.json';
@@ -20,6 +21,7 @@ import handoff from './sessions/handoff.json';
 import breakdown from './sessions/breakdown.json';
 
 const SESSIONS: Record<string, any> = {
+  mission,
   lifecycle,
   review,
   architecture,

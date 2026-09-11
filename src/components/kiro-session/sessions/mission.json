@@ -1,0 +1,74 @@
+{
+  "id": "mission",
+  "title": "Mission: plan.md",
+  "subtitle": "The dev agent runs a multi-phase plan as a mission: distill the macro-goal, delegate the build to the coder sub-agent (and lookups to scout), QA-gate each phase, then audit the acceptance ledger and clear — driven by the /goal loop.",
+  "model": "Claude Opus 4.8",
+  "effort": "High",
+  "mode": "Mission",
+  "autopilot": true,
+  "capability": "mission",
+  "stepped": true,
+  "note": "Illustrative demo of mission mode, the /goal loop, dev + sub-agents, and the qa skill — recorded, not live.",
+  "turns": [
+    {
+      "role": "user",
+      "stage": "Kick off the mission",
+      "blocks": [
+        { "type": "text", "text": "/goal Implement ALL phases of plan.md and set it as the mission using the mission skill (distill the macro-goal, to-do list for EVERY phase, sentinel --preapproved). QA-gate each phase, then audit requirement-by-requirement and clear. Decide reversible forks yourself; don't stop to ask. --max 50" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "stage": "Set the mission (mission skill)",
+      "blocks": [
+        { "type": "tool", "name": "read_file", "summary": "Read plan.md", "detail": "plan.md — 3 phases:\n  P1 Billing API client (typed, retries)\n  P2 Sync engine (diff + conflict-safe writes)\n  P3 CLI wiring + docs" },
+        { "type": "text", "text": "Distilling the macro-goal and enumerating **all three phases** up front — the ledger judges the whole plan, not just the phase in front of me." },
+        { "type": "tool", "name": "mission-state.js --init --preapproved", "summary": "Write the mission sentinel (pre-approved autonomous)", "detail": "WROTE .kiro-mission.<sid>\nstate: active   preapproved: yes" },
+        { "type": "tool", "name": "mission-state.js --accept-add ×3", "summary": "Record the acceptance ledger — one criterion per phase", "detail": "p1-billing-client · p2-sync-engine · p3-cli-docs  (each MET only with cited evidence)" },
+        { "type": "text", "text": "**Mission set** (pre-approved autonomous). Task list covers P1–P3; acceptance ledger has 3 criteria. The `/goal` loop will re-invoke this session each turn until the ledger is clean. Starting **Phase 1**." }
+      ]
+    },
+    {
+      "role": "assistant",
+      "stage": "Phase 1 — delegate the build",
+      "blocks": [
+        { "type": "tool", "name": "invoke_sub_agent (scout)", "summary": "Read-only lookup: where does the HTTP layer live?", "detail": "scout (Sonnet, read-only): returns `src/http/` uses a shared `fetchJson` wrapper — reuse it, don't add a new client." },
+        { "type": "tool", "name": "invoke_sub_agent (coder)", "summary": "Delegate Phase 1 implementation to the coder sub-agent", "detail": "coder (Sonnet) builds against the spec + scout's finding: reuses fetchJson, adds typed BillingClient with retry/backoff. Reports back what it wrote." },
+        { "type": "diff", "file": "src/billing/client.ts", "hunks": [
+          { "type": "add", "text": "export class BillingClient { /* typed calls over the shared fetchJson */ }" },
+          { "type": "add", "text": "// exponential backoff on 429/5xx; never logs the API key" }
+        ] },
+        { "type": "text", "text": "Phase 1 built by `coder`. Auditing against the plan (typed ✓, retries ✓, reuses fetchJson ✓), then running QA before I move on." }
+      ]
+    },
+    {
+      "role": "assistant",
+      "stage": "Phase 1 — run the qa skill",
+      "blocks": [
+        { "type": "tool", "name": "qa skill", "summary": "Verify Phase 1 (code-only → its own tests, red-green)", "detail": "No product UI in P1, so QA = the unit suite, not a browser render.\n$ npm test  → 14/14 passing (incl. a red-green retry/backoff case)." },
+        { "type": "text", "text": "**Phase 1 QA: PASS** — WORKS ✓ (14/14, red-green on the retry path), MATCHES INTENT ✓ (typed client with retries, reuses the shared wrapper). Recording it MET with evidence and moving to Phase 2." },
+        { "type": "tool", "name": "mission-state.js --accept-set", "summary": "Ledger: p1-billing-client = MET (evidence: 14/14 tests)", "detail": "MET p1-billing-client  evidence='npm test 14/14; red-green retry case'" }
+      ]
+    },
+    {
+      "role": "assistant",
+      "stage": "Phase 2 — build + QA (front-end)",
+      "blocks": [
+        { "type": "tool", "name": "invoke_sub_agent (coder)", "summary": "Delegate Phase 2 (sync engine + a small status page)", "detail": "coder builds the diff/conflict-safe sync engine and a /sync status page. Applied the design skill's full state set (loading/empty/error) while building the page." },
+        { "type": "tool", "name": "qa skill", "summary": "Full QA — real browser render (product surface changed)", "detail": ".qa-active sentinel set (arms the render gate).\nRendered /sync in a headed browser at staging; checked loading, empty, error + a conflict.\nCoverage receipt: COVERAGE-OK." },
+        { "type": "text", "text": "**Phase 2 QA: PASS** — WORKS ✓ (sync + conflict resolution verified), MATCHES INTENT ✓ (status page shows loading/empty/error, not just the happy path). A fetch/200 wouldn't have caught the blank-empty-state bug the render did. Ledger updated; on to Phase 3." }
+      ]
+    },
+    {
+      "role": "assistant",
+      "stage": "Audit + clear",
+      "blocks": [
+        { "type": "tool", "name": "mission-state.js --set audit", "summary": "Enter the completion audit", "detail": "state: audit — re-read plan.md and verify EVERY requirement MET with cited evidence." },
+        { "type": "text", "text": "**Requirement-by-requirement audit vs plan.md:** P1 billing client MET (tests) · P2 sync engine + status page MET (render + coverage) · P3 CLI wiring + docs MET (built + `--help` verified). No gaps, no partial rollouts, no deferred scope." },
+        { "type": "tool", "name": "mission-state.js --accept-show", "summary": "Ledger status", "detail": "criteria: 3   status: COMPLETE (clear allowed)" },
+        { "type": "tool", "name": "mission-state.js --clear", "summary": "Clear the mission", "detail": "CLEARED — the objective is achieved." },
+        { "type": "text", "text": "All three phases built, QA green each phase, ledger **COMPLETE** — mission cleared and the `/goal` loop stops. Every reversible fork along the way was decided and logged; nothing needed a one-way-door stop." }
+      ]
+    }
+  ]
+}

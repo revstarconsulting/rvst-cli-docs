@@ -14,9 +14,21 @@ you try it yourself.
 <Aside type="note">
 Everything below runs under the **`dev`** agent (Opus). `dev` orchestrates:
 it applies skills itself and delegates well-specified implementation to the
-**`coder`** sub-agent (Sonnet). It never routes to a Haiku model or an
-auto-router.
+**`coder`** sub-agent (Sonnet) and read-only lookups to **`scout`** (Sonnet).
+It never routes to a Haiku model or an auto-router.
 </Aside>
+
+## A mission, driven autonomously
+
+The flagship workflow: hand `dev` a plan with the **`/goal`** loop and it sets a
+**mission** (via the `mission` skill), enumerates every phase in an **acceptance
+ledger**, then works phase-by-phase — delegating the build to the **`coder`**
+sub-agent and lookups to **`scout`**, running the **`qa`** skill at the end of
+each phase, and finally auditing the ledger requirement-by-requirement and
+clearing. It only stops for a genuine one-way door; every reversible fork is
+decided and logged.
+
+<KiroSession session="mission" />
 
 ## A feature, end to end
 

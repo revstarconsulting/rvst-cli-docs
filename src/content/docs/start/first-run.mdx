@@ -65,6 +65,35 @@ credential store. Switching clients never mixes credentials — a project bound
 to one client cannot authenticate against another.
 </Aside>
 
+## Multi-repo projects
+
+A project can span **several repos** — a frontend and a backend, say — so one
+Kiro session and one mission work across all of them. A project is a workspace
+folder bound to one client, plus a `.kiro/repos.json` mapping of its repos. Each
+repo is either **cloned** from a git URL into a workspace subfolder, or **linked**
+(symlinked) from a clone you already have.
+
+From the GUI (`kiroctl gui`): when creating a project, add one or more repos —
+each row is a **git URL** (cloned) or an **existing local path** (linked); the
+project opens only once every repo is in place. Existing projects get an **Add
+repo** box.
+
+From the CLI:
+
+```sh
+kiroctl project add-repo --dir ~/kiro/acme --url git@github.com:org/frontend.git
+kiroctl project add-repo --dir ~/kiro/acme --link /path/to/existing/backend
+kiroctl project repos    --dir ~/kiro/acme
+kiroctl open             --dir ~/kiro/acme --run   # clones any missing, then launches
+```
+
+<Aside type="note">
+Cloning private repos uses your **existing git/GitHub credentials** (SSH or
+`gh`) — the client governs AWS/Kiro SSO, not GitHub. A URL with an embedded
+credential is rejected. `open` clones only what's missing and never auto-pulls,
+so it won't disturb a working tree.
+</Aside>
+
 ## Next step
 
 Continue to [Try Kiro](/start/try-kiro/) for a walkthrough of your first

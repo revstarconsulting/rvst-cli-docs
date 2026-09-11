@@ -7,7 +7,7 @@
   "mode": "Default",
   "autopilot": true,
   "capability": "architecture",
-  "note": "Illustrative demo grounded in the revstar/kiro architecture skill — recorded, not live.",
+  "note": "Illustrative demo grounded in the Kiro Workbench architecture skill — recorded, not live.",
   "turns": [
     {
       "role": "user",

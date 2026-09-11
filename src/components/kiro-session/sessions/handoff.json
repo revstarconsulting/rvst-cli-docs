@@ -7,7 +7,7 @@
   "mode": "Default",
   "autopilot": true,
   "capability": "handoff",
-  "note": "Illustrative demo grounded in the revstar/kiro handoff skill — recorded, not live.",
+  "note": "Illustrative demo grounded in the Kiro Workbench handoff skill — recorded, not live.",
   "turns": [
     {
       "role": "user",

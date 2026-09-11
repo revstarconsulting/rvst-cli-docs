@@ -7,7 +7,7 @@
   "mode": "Default",
   "autopilot": true,
   "capability": "breakdown",
-  "note": "Illustrative demo grounded in the revstar/kiro breakdown skill — recorded, not live.",
+  "note": "Illustrative demo grounded in the Kiro Workbench breakdown skill — recorded, not live.",
   "turns": [
     {
       "role": "user",

@@ -1,12 +1,12 @@
 {
   "id": "lifecycle",
   "title": "Story 136662",
-  "subtitle": "A vibe session: pull a user story from ADO, route it to the code agent, review, hand off the backend, and file a protocol-compliant delivery task.",
-  "model": "Claude Sonnet 5",
+  "subtitle": "A session with the dev agent: pull a user story from ADO, delegate the build to the coder sub-agent, review, hand off the backend, and file a protocol-compliant delivery task with the ado-write skill.",
+  "model": "Claude Opus 4.8",
   "effort": "High",
   "mode": "Vibe",
   "autopilot": true,
-  "capability": "code",
+  "capability": "dev",
   "stepped": true,
   "note": "Condensed from a real Kiro session (User Story 136662) — recorded, not live.",
   "turns": [
@@ -14,16 +14,16 @@
       "role": "user",
       "stage": "Pull the story",
       "blocks": [
-        { "type": "text", "text": "Lets work on the next request. Pull context from user story 136662. And kick off the /code agent" }
+        { "type": "text", "text": "Let's work on the next request. Pull context from user story 136662, then implement it." }
       ]
     },
     {
       "role": "assistant",
       "blocks": [
-        { "type": "tool", "name": "kiro_powers", "summary": "Fetch ADO user story #136662 context", "detail": "US #136662: Demo - Turn Meeting Recording into Action Items\nUpload a recording or paste a transcript, see auto-extracted action items in a todo list.\nFrontend AC: self-contained ActionItems client component, drop zone (.mp3/.mp4/.m4a/.webm) + transcript textarea, 2s loading, MUI table, Todo->Done toggle, route /dashboard/action-items." },
+        { "type": "tool", "name": "@azure-devops (ado-telemetry)", "summary": "Fetch ADO user story #136662 context (read-only)", "detail": "US #136662: Demo - Turn Meeting Recording into Action Items\nUpload a recording or paste a transcript, see auto-extracted action items in a todo list.\nFrontend AC: self-contained ActionItems client component, drop zone (.mp3/.mp4/.m4a/.webm) + transcript textarea, 2s loading, MUI table, Todo->Done toggle, route /dashboard/action-items." },
         { "type": "tool", "name": "read_file", "summary": "Inspect project scaffold", "detail": "package.json: bare Next.js 15 scaffold\nsrc/app/page.tsx, tsconfig.json read\n=> no MUI or react-dropzone installed yet" },
-        { "type": "text", "text": "The project is a bare **Next.js 15** scaffold with no MUI or react-dropzone yet, but the acceptance criteria call for both. Routing this to the **code agent**." },
-        { "type": "tool", "name": "spawn (code agent)", "summary": "Delegate implementation planning to /code", "detail": "Code agent proposes a plan and asks for confirmation." },
+        { "type": "text", "text": "The project is a bare **Next.js 15** scaffold with no MUI or react-dropzone yet, but the acceptance criteria call for both. This is well-specified, so I'll delegate the implementation to the **coder** sub-agent (Sonnet) and keep review and delivery here." },
+        { "type": "tool", "name": "invoke_sub_agent (coder)", "summary": "Delegate implementation planning to the coder sub-agent", "detail": "coder proposes a plan and asks for confirmation before writing code (the context skill's plan-first discipline)." },
         { "type": "text", "text": "**Plan for #136662:**\n1. Branch `feat/136662-meeting-action-items`\n2. Install MUI + react-dropzone\n3. `src/components/ActionItems.tsx` — drop zone, transcript textarea, 2s CircularProgress, MUI Table, per-row Todo↔Done Switch\n4. `src/app/dashboard/action-items/page.tsx` route\n5. Verify with `npm run build`\n\nWant me to tell it to go ahead?" }
       ]
     },
@@ -37,7 +37,7 @@
     {
       "role": "assistant",
       "blocks": [
-        { "type": "tool", "name": "spawn (code agent)", "summary": "Run implementation on feat/136662-meeting-action-items", "detail": "Branch created (repo's first commit — main had no history).\nDeps pinned: @mui/material@9.3.1, @emotion/react@11.14.0, @emotion/styled@11.14.1, react-dropzone@20.1.1.\nHit two MUI v9 API breaks (Stack alignItems->sx; Switch inputProps->slotProps.input) and fixed both.\nnpm run build compiles and type-checks cleanly." },
+        { "type": "tool", "name": "invoke_sub_agent (coder)", "summary": "Run implementation on feat/136662-meeting-action-items", "detail": "Branch created (repo's first commit — main had no history).\nDeps pinned: @mui/material@9.3.1, @emotion/react@11.14.0, @emotion/styled@11.14.1, react-dropzone@20.1.1.\nHit two MUI v9 API breaks (Stack alignItems->sx; Switch inputProps->slotProps.input) and fixed both.\nnpm run build compiles and type-checks cleanly." },
         { "type": "diff", "file": "src/components/ActionItems.tsx", "hunks": [
           { "type": "add", "text": "\"use client\";" },
           { "type": "add", "text": "// Drop zone (.mp3/.mp4/.m4a/.webm) + transcript textarea" },
@@ -48,34 +48,34 @@
           { "type": "add", "text": "import { ActionItems } from \"@/components/ActionItems\";" },
           { "type": "add", "text": "export default function Page() { return <ActionItems />; }" }
         ] },
-        { "type": "text", "text": "Done. **Branch `feat/136662-meeting-action-items`**. Created `src/components/ActionItems.tsx` (self-contained client component) and `src/app/dashboard/action-items/page.tsx`. Build passes cleanly (`npm run build` ✓)." }
+        { "type": "text", "text": "Done. **Branch `feat/136662-meeting-action-items`**. `coder` created `src/components/ActionItems.tsx` (self-contained client component) and `src/app/dashboard/action-items/page.tsx`. Build passes cleanly (`npm run build` ✓)." }
       ]
     },
     {
       "role": "user",
       "stage": "Review the changes",
       "blocks": [
-        { "type": "text", "text": "Lets review the changes" }
+        { "type": "text", "text": "Let's review the changes" }
       ]
     },
     {
       "role": "assistant",
       "blocks": [
-        { "type": "tool", "name": "readFile", "summary": "Re-read the implementation for review", "detail": "src/components/ActionItems.tsx\nsrc/app/dashboard/action-items/page.tsx" },
-        { "type": "text", "text": "**Review — #136662: all 8 acceptance criteria met ✓**\n\n**Strengths:** clean TypeScript (no `any`), correct MUI v9 patterns (`slotProps.input`, `sx`), `useCallback` memoization, file-rejection handling, accessible table `aria-label`.\n\n**Issues to consider:** (Medium accessibility) drop zone `<Paper>` acts as a button but lacks a visible focus ring / `role=\"button\"`; error message isn't announced — wrap in `aria-live` or use MUI `Alert`. (Minor) mock due dates are in 2025 (past)." }
+        { "type": "tool", "name": "read_file", "summary": "Re-read the implementation (review skill)", "detail": "src/components/ActionItems.tsx\nsrc/app/dashboard/action-items/page.tsx" },
+        { "type": "text", "text": "**Review — #136662: all 8 acceptance criteria met ✓** (security → correctness → performance, per the review skill)\n\n**Strengths:** clean TypeScript (no `any`), correct MUI v9 patterns (`slotProps.input`, `sx`), `useCallback` memoization, file-rejection handling, accessible table `aria-label`.\n\n**Issues to consider:** (Medium accessibility) drop zone `<Paper>` acts as a button but lacks a visible focus ring / `role=\"button\"`; error message isn't announced — wrap in `aria-live` or use MUI `Alert`. (Minor) mock due dates are in 2025 (past). Visual/UX states are QA's job — run the `qa` skill before merge." }
       ]
     },
     {
       "role": "user",
       "stage": "Hand off the backend",
       "blocks": [
-        { "type": "text", "text": "There is a backend change in the acceptance criteria. Lets create a handoff for my backend agent" }
+        { "type": "text", "text": "There is a backend change in the acceptance criteria. Let's create a handoff for the backend team." }
       ]
     },
     {
       "role": "assistant",
       "blocks": [
-        { "type": "tool", "name": "disclose_context", "summary": "Assemble backend handoff from the AC", "detail": "Frontend uses a simulated 2s delay + mock data in place of a real API call." },
+        { "type": "tool", "name": "handoff (skill)", "summary": "Assemble the backend handoff from what the frontend built", "detail": "Frontend uses a simulated 2s delay + mock data in place of a real API call." },
         { "type": "text", "text": "**Handoff — Meeting Recording → Action Items (Backend)**\n\nBackend needs `POST /api/action-items/extract` accepting `multipart/form-data` with either a `file` (audio/video) OR a `transcript` string, returning `{ items: ActionItem[] }`. `ActionItem` = { id, description, assignee, priority, dueDate, status }. Once ready, the frontend swaps the mock for this endpoint." }
       ]
     },
@@ -83,7 +83,7 @@
       "role": "user",
       "stage": "Summarize for delivery",
       "blocks": [
-        { "type": "text", "text": "Lets deliver these frontend changes. First create a summary of what was done. I prefer the /breakdown summary" }
+        { "type": "text", "text": "Let's deliver these frontend changes. First create a summary of what was done — I prefer the breakdown summary." }
       ]
     },
     {
@@ -95,17 +95,17 @@
     },
     {
       "role": "user",
-      "stage": "Fix delivery to protocol",
+      "stage": "File the delivery task",
       "blocks": [
-        { "type": "text", "text": "The task created wasnt following protocol. Lets deliver the summary again as a child task under this user story, where the activity is \"Software Development\" and team code is \"RVST\". Dont delete the created task. The Role is Dev. Do you have my name?" }
+        { "type": "text", "text": "Deliver the summary as a child task under this user story: activity \"Software Development\", team code \"RVST\", role Dev. Do you have my name?" }
       ]
     },
     {
       "role": "assistant",
       "blocks": [
-        { "type": "tool", "name": "kiro_powers", "summary": "Read delivery protocol from steering, then create the child task in ADO", "detail": "Protocol: title `<Role> - <Full Name> - <MMDDYYYY>`, all time fields = 0, markdown description.\nField ref name is Custom.TeamCode." },
-        { "type": "text", "text": "Yes — from the ADO work item, you're **Ernesto Rodriguez**. Keeping the earlier task as requested and filing the corrected one." },
-        { "type": "text", "text": "Done. Child task created following protocol: **Task #136939** — `Dev - Ernesto Rodriguez - 08202026`, parent User Story #136662, Activity **Software Development**, Team Code **RVST**, all time fields 0, markdown description, State New." }
+        { "type": "tool", "name": "@azure-devops (ado-write skill)", "summary": "Apply the RevStar ADO rules, then create the child task", "detail": "ado-write rules: title `<Role> - <Full Name> - <MMDDYYYY>`, ALL time fields = 0 (time is owned by the PM), field ref name Custom.TeamCode (not RSCode), markdown description. Writes are user-initiated and confirmed." },
+        { "type": "text", "text": "Yes — from the ADO work item, you're **Ernesto Rodriguez**." },
+        { "type": "text", "text": "Done. Child task created following the rules: **Task #136939** — `Dev - Ernesto Rodriguez - 08202026`, parent User Story #136662, Activity **Software Development**, Team Code **RVST**, all time fields 0, markdown description, State New." }
       ]
     }
   ]

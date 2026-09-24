@@ -36,13 +36,52 @@ Intent is written down **before** the implementation is read, so the verdict
 isn't quietly rationalized around whatever got built.
 </Aside>
 
+## Building the test list mechanically
+
+A full run doesn't enumerate the product surface in prose — it builds the test
+list with scripts, so a route nobody thought to test can't slip through. Every
+project declares a **`qa-contract.json`** (principals, where ownership lives, how
+to read backend state, what leaves the system and where the fake sink is, and
+which files declare routes), and the Phase-0 pipeline runs off it:
+
+- **`qa-surface-inventory.js`** — walks the tree and enumerates every surface a
+  human sees, classifying each into eight kinds (collection, scalar, record,
+  input, artifact, transition, generated, mirrored). The output is a *floor* you
+  widen, never shrink.
+- **`qa-interaction-inventory.js`** — for a multi-principal app, every ownership
+  entity × every write path becomes one cross-actor test point.
+- **`qa-registry-merge.js`** — assembles the generated fragments into the test
+  registry and emits a **prefix manifest**: the canonical test-ID set stated as
+  fact, so a legitimate single-case area can't go invisible.
+- **`qa-contract-validate.js`** — checks the contract against a mechanical floor,
+  and hard-blocks a production target.
+- **`qa-egress-probe.js`** / **`qa-case-decay.js`** — prove the fake egress sink
+  is real before a run trusts it, and tier boringly-green cases into a sampled set
+  so the mandatory load stays bounded across runs.
+
+<Aside type="note">
+The whole pipeline is plain Node — it runs identically on macOS, WSL and Linux.
+The contract lives at the project root; start from the shipped
+`qa-contract.example.json` and see the contract-conformance reference.
+</Aside>
+
 ## Full-run coverage
 
 A full QA run has to prove it actually covered everything, not just assert it
-did. **`qa-coverage-receipt.js`** is the coverage oracle: it reconciles what was
-tested against the product's test registry and emits `COVERAGE-OK` only when
-every item is accounted for. The **`qa-report-gate`** blocks a written QA report
-that's missing intent verdicts, render evidence, or that coverage receipt.
+did. **`qa-coverage-receipt.js`** is the coverage oracle: it reconciles the
+ledger of what was tested against the registry and the prefix manifest and emits
+`COVERAGE-OK` only when every item is accounted for. It blocks on orphaned test
+IDs, a verdict on a test that never ran, too many not-executed cases, coverage
+below the bar, uninspected routes, **manifest drift** (a case missing from the
+canonical set), and — when the surface gate is armed — a surface the mission
+*touched* that carries no test case. Retired and sampled-decay cases are excluded
+from the denominator and reported separately, never silently dropped.
+
+The **`qa-report-gate`** blocks a written QA report that's missing intent
+verdicts, render evidence, or that `COVERAGE-OK` line. And because Kiro's stop
+hook can't hard-block, **`ci/qa-gate.sh`** gives the same teeth a second home: it
+recomputes the receipt and exits non-zero on `COVERAGE-FAIL`, so a CI job or a git
+pre-push hook stops a change that would ship with orphaned cases.
 
 ## Definition of done
 

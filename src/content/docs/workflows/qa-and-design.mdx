@@ -65,6 +65,58 @@ The contract lives at the project root; start from the shipped
 `qa-contract.example.json` and see the contract-conformance reference.
 </Aside>
 
+## Setting up QA in a project
+
+A one-time setup wires the protocol into a project. Five steps:
+
+**1. Declare the contract.** Copy the shipped example to the project root and edit
+it for your project — principals, where ownership lives, the backend read command,
+the egress sink, and which files declare routes. The contract-conformance reference
+walks each field.
+
+```sh
+cp <pack>/skills/qa/references/qa-contract.example.json ./qa-contract.json
+# edit it, then validate against the mechanical floor (hard-blocks a prod target):
+node <pack>/bin/qa-contract-validate.js --contract ./qa-contract.json --probe
+```
+
+A `CONTRACT-OK` receipt is the confirmation; until it exists the new dimensions
+report but don't gate.
+
+**2. Build the test list.** On a full run the `qa` skill runs the Phase-0 pipeline
+for you (surface + interaction inventories → `qa-registry-merge.js` → the prefix
+manifest). You can also run them by hand from the project root while iterating on
+the contract.
+
+**3. Arm the gates.** Gates are inert until an enable flag exists — globally at
+`$KIRO_HOME/gates/<gate>.enabled` or per-project at `<project>/.kiro/gates/`. Arm
+one at a time:
+
+```sh
+touch ~/.kiro/gates/qa-render-gate.enabled     # block fetch-instead-of-render during QA
+touch ~/.kiro/gates/qa-report-gate.enabled     # block a report missing verdicts/receipt
+# optional, opt-in: block a mission-touched surface with no test case
+touch ~/.kiro/gates/qa-surface-gate.enabled
+```
+
+**4. Wire the deterministic teeth.** `ci/qa-gate.sh` recomputes the coverage
+receipt and exits non-zero on `COVERAGE-FAIL`. Add it to CI, or as a git pre-push
+hook:
+
+```sh
+ln -s ../../ci/qa-gate.sh .git/hooks/pre-push
+```
+
+**5. Run it.** Say **"do QA"** for a scoped run or **"full QA"** for a complete
+audit. The skill creates its own `.qa-active` sentinel (which arms the render gate),
+follows the protocol, and writes the report + coverage receipt.
+
+<Aside type="note">
+Everything is Node + POSIX `sh` — the same setup works on macOS, WSL and Linux. The
+pack ships the scripts; you only add the project's `qa-contract.json`, the gate
+flags you want armed, and the CI hook.
+</Aside>
+
 ## Full-run coverage
 
 A full QA run has to prove it actually covered everything, not just assert it

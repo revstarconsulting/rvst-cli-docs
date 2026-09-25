@@ -36,20 +36,50 @@ edits (changing state, reassigning, editing someone else's item, deletes) are
 gated behind explicit confirmation.
 </Aside>
 
-## Setting your PAT
+## Set up ADO for a client (org, project, PAT)
 
-The Personal Access Token is scoped **per client**, not global. Set it either:
+ADO is configured **per client** and injected automatically when you
+`kiroctl open` a project bound to that client — no manual `export`. Set three
+things on the client, once:
 
-- from the **PAT field in the GUI**, or
-- from the CLI, piped in rather than passed as an argument:
+- **Org URL + default project** — in the GUI client form (the "Azure DevOps org
+  URL" / "ADO default project" fields, right where you add the client), or from
+  the CLI:
+
+  ```sh
+  kiroctl client set-ado --slug <client> \
+    --ado-org https://dev.azure.com/YourOrg --ado-project "Your Project"
+  ```
+
+- **PAT** (scoped per client, never global) — from the GUI PAT field, or piped in
+  from the CLI (never passed as an argument):
 
   ```sh
   printf '%s' '<pat>' | kiroctl client set-pat --slug <client>
   ```
 
-The token is stored in the OS keychain, falling back to a `0600`-permission
-file if no keychain is available. It's injected as the `AZURE_DEVOPS_PAT`
-environment variable at launch — it is **never** written into `mcp.json`.
+The PAT is stored in the OS keychain (falling back to a `0600`-permission file)
+and is **never** written into `mcp.json`.
+
+### What `open` injects
+
+When you open a project bound to the client, `kiroctl open` injects the client's
+ADO config into the session in **both** naming conventions, so both consumers
+work with zero manual setup:
+
+- `AZURE_DEVOPS_PAT` / `AZURE_DEVOPS_ORG_URL` / `AZURE_DEVOPS_DEFAULT_PROJECT` —
+  for the **`azure-devops` MCP server** (the `ado-write` / `ado-telemetry` skills).
+- `ADO_PAT` / `ADO_ORG_URL` / `ADO_PROJECT` — for the **`kiroctl ado`** CLI.
+
+`mcp.json` references org/project from the environment
+(`${AZURE_DEVOPS_ORG_URL}` etc.), so a session automatically targets the *bound
+client's* org and project — not a hardcoded one.
+
+<Aside type="note">
+Opening via the GUI is the same as `kiroctl open --dir <dir> --run` — both inject
+the ADO env and launch. `kiroctl open --dir <dir>` **without** `--run` is preflight
+only (it checks and prints, doesn't launch).
+</Aside>
 
 ## Reading without writing
 
@@ -60,9 +90,12 @@ roadmap — use the sibling:
 - the **`ado-telemetry`** skill from inside a session.
 
 <Steps>
-1. Confirm your PAT is set for the client: `kiroctl client list`.
-2. Pull a read-only snapshot: `kiroctl ado telemetry --json` (or just ask for
-   sprint status in-session).
-3. When you're ready to log work, let the agent invoke `ado-write` — don't
-   hand-edit the ticket format yourself.
+1. Confirm the client has org, project and PAT set: `kiroctl client list` (org/project
+   show inline; the PAT is stored separately).
+2. Open a project bound to that client (GUI or `kiroctl open --dir <dir> --run`). Inside
+   that session everything is wired — no `export` needed.
+3. Pull a read-only snapshot: `kiroctl ado telemetry --json` (or just ask for sprint
+   status in-session).
+4. When you're ready to log work, let the agent invoke `ado-write` — don't hand-edit
+   the ticket format yourself.
 </Steps>

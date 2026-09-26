@@ -115,6 +115,11 @@ follows the protocol, and writes the report + coverage receipt.
 Everything is Node + POSIX `sh` — the same setup works on macOS, WSL and Linux. The
 pack ships the scripts; you only add the project's `qa-contract.json`, the gate
 flags you want armed, and the CI hook.
+
+On a **display-less Linux** host, QA still renders **headed** (never headless) by
+running the browser under a virtual framebuffer — install Xvfb
+(`sudo apt-get install -y xvfb`) and the pack auto-wraps the Playwright MCP in
+`xvfb-run`. macOS and Windows use their native desktop and need nothing extra.
 </Aside>
 
 ## Full-run coverage

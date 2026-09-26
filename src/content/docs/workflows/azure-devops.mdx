@@ -59,7 +59,10 @@ things on the client, once:
   ```
 
 The PAT is stored in the OS keychain (falling back to a `0600`-permission file)
-and is **never** written into `mcp.json`.
+and is **never** written into `mcp.json`. It (and the org/project) are injected when
+you **`open`** the project — so set the PAT *before* opening, and if you change it,
+**relaunch** the session for the new value to take effect (a running session keeps
+what it launched with).
 
 ### What `open` injects
 
